@@ -4,7 +4,7 @@ use DEHy
 use DEV
 use escolha_do_filtro
 	implicit none
-	real(8), parameter :: pi = 3.141592653589793238462643383279502884197d0
+	real(8), parameter :: pi = 3.1415926535897932384626433832795d0
 	real(8), parameter :: mu = 4.d0*pi*1d-7
 	real(8), parameter :: eps = 8.85d0*1.d-12
 	real(8), parameter :: Iw = 1.d0
