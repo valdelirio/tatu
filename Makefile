@@ -1,5 +1,8 @@
-mod1d: computationalstuff.o filtros.o escolhadofiltro.o dehx.o dehy.o dev.o dmhx.o dmhy.o dmv.o csv_file.o main1D.o
-	gfortran -std=f2008 -pedantic -o mod1d.x computationalstuff.o filtros.o escolhadofiltro.o dehx.o dehy.o dev.o dmhx.o dmhy.o dmv.o csv_file.o main1D.o
+mod1d: Anderson.o computationalstuff.o filtros.o escolhadofiltro.o dehx.o dehy.o dev.o dmhx.o dmhy.o dmv.o csv_file.o main1D.o
+	gfortran -o mod1d.x Anderson.o computationalstuff.o filtros.o escolhadofiltro.o dehx.o dehy.o dev.o dmhx.o dmhy.o dmv.o csv_file.o main1D.o
+
+Anderson.o: Anderson.for
+	gfortran -std=legacy -c Anderson.for
 
 computationalstuff.o: computationalstuff.f08
 	gfortran -c computationalstuff.f08
@@ -33,3 +36,6 @@ csv_file.o: csv_file.f08
 
 main1D.o: main1D.f08
 	gfortran -c main1D.f08
+
+clean:
+	rm *.o *.mod *.x
