@@ -1,0 +1,19 @@
+source_type dehx                   ! Especificacao da fonte: DMV, DMHx, DMHy, DEV, DEHx, DEHy, BCH ou  MT
+
+source_initial -5.d3 0.d0 9.7d3    ! posicao inicial das coordenadas do transmissor
+source_direction x                ! modo de entrada linear em: x ou y ou z
+source_step 2.5d2
+source_final 5.d3
+
+receiver_initial -7.d3 0.d0 1.d3  ! posicao inicial das coordenadas do receptor
+receiver_direction x              ! modo de entrada linear em: x ou y ou z
+receiver_step 5.d2
+receiver_final 7.d3
+
+frequency_initial 1.d-1           ! frequencia minima de entrada
+frequency_samples 3               ! numero de frequencias de investigacao (logaritmica)
+frequency_final 2.5d-1              ! frequencia maxima de entrada
+
+number_layers 3                   ! numero de camadas
+layer_thickness 1.d3 5.d2        ! vetor de n-1 espessuras
+layer_resistivity 0.3d0 1.d2 1.d3 ! vetor de n resistividades
