@@ -265,7 +265,10 @@ select case (sourceT)
   case default
     stop'Source was entered incorretly'
   end select
-
+! the file output is stored in csv format
+! The first line gives information about the columns.
+! Each line registers the field components in each receiver at a certain frequency,
+! for a given transmitter position 
 call csv_write_dble_2d(numfile, transpose(myout))
 
 call cpu_time(t2)
