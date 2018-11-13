@@ -29,7 +29,7 @@ complex(dp) :: eta0, zeta, Exp, Eyp, Ezp, Hxp, Hyp, Hzp
 
 call cpu_time(t1)
 !reading input file
-open( unit = 100, file = 'param.in', status = 'old', action = 'read' )
+open( unit = 100, file = 'input.in', status = 'old', action = 'read' )
 read(100,*)sourcetype, sourceT
 
 read(100,*)iniposT, Tx1, Ty1, Tz1
