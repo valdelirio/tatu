@@ -37,24 +37,24 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   real(dp), parameter :: eps = 1.d-7
 
   if ( dabs(cx - Tx) < eps ) then
-    ehsingx = 1
-    x = 0.d0
+    ! ehsingx = 1
+    x = 1.d-2
   else
-    ehsingx = 0
+    ! ehsingx = 0
     x = cx - Tx
   end if
   if ( dabs(cy - Ty) < eps ) then
-    ehsingy = 1
-    y = 0.d0
+    ! ehsingy = 1
+    y = 1.d-2
   else
-    ehsingy = 0
+    ! ehsingy = 0
     y = cy - Ty
   end if
   if ( ehsingx == 1 .and. ehsingy == 1 ) then
-    ehsingxy = 1
-    r = 0.d0
+    ! ehsingxy = 1
+    r = 1.d-2
   else
-    ehsingxy = 0
+    ! ehsingxy = 0
     r = dsqrt(x**2 + y**2)
   end if
 
@@ -401,51 +401,51 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
     Ktedz_J0 = ( AdmIntJ0(:,0) * TEupJ0(:,0) * exp( uJ0(:,0) * z ) ) * w_J0(:)
     Ktedz_J1 = ( AdmIntJ1(:,0) * TEupJ1(:,0) * exp( uJ1(:,0) * z ) ) * w_J1(:)
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Ex_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Ex_p = (0.d0,0.d0)
+    ! else
       kernelExJ1 = x * y * ( Ktmdz_J1 - Kte_J1 ) / ( r ** 3 )
       kernelExJ0 = x * y * ( Ktmdz_J0 - Kte_J0 ) * krJ0 / ( 2.d0 * r ** 2 )
       Ex_p = ( sum( kernelExJ1 ) - sum( kernelExJ0 ) ) / ( pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Ey_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Ey_p = (0.d0,0.d0)
+    ! else
       kernelEyJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktmdz_J1 + ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Kte_J1
       kernelEyJ0 = ( y * y * Ktmdz_J0 + x * x * Kte_J0 ) * krJ0 / r ** 2
       Ey_p = -( sum( kernelEyJ1 ) + sum( kernelEyJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingy == 1 ) then
-      Ez_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingy == 1 ) then
+    !   Ez_p = (0.d0,0.d0)
+    ! else
       kernelEzJ1 = ( y / ( r * neta ) ) * Ktm_J1 * krJ1 * krJ1
       Ez_p = - sum( kernelEzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Hx_p = (1.d-25,1.d-25)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Hx_p = (1.d-25,1.d-25)
+    ! else
       kernelHxJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktm_J1 + ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Ktedz_J1
       kernelHxJ0 = ( y * y * Ktm_J0 + x * x * Ktedz_J0 ) * krJ0 / r ** 2
       Hx_p = -( sum( kernelHxJ1 ) + sum( kernelHxJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Hy_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Hy_p = (0.d0,0.d0)
+    ! else
       kernelHyJ1 = x * y * ( Ktm_J1 - Ktedz_J1 ) / r ** 3
       kernelHyJ0 = x * y * ( Ktm_J0 - Ktedz_J0 ) * krJ0 / ( 2.d0 * r * r )
       Hy_p = ( - sum( kernelHyJ1 ) + sum( kernelHyJ0 ) ) / ( pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 ) then
-      Hz_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 ) then
+    !   Hz_p = (0.d0,0.d0)
+    ! else
       kernelHzJ1 = x/(r*zeta) * Kte_J1 * krJ1 * krJ1
       Hz_p = - sum( kernelHzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
   else if ( camad < camadT ) then !camada k
 
@@ -467,50 +467,50 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
     Ktedz_J1 = ( AdmIntJ1(:,camad) * TEupJ1(:,camad) * ( exp( uJ1(:,camad) * ( z - prof(camad) ) ) - &
                     RTEupJ1(:,camad) * exp( -uJ1(:,camad) * ( z - prof(camad - 1) + h(camad) ) ) ) ) * w_J1(:)
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Ex_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Ex_p = (0.d0,0.d0)
+    ! else
       kernelExJ1 = x * y * ( Ktmdz_J1 - Kte_J1 ) / ( r * r * r )
       kernelExJ0 = x * y * ( Ktmdz_J0 - Kte_J0 ) * krJ0 / ( 2.d0 * r * r )
       Ex_p = ( sum( kernelExJ1 ) - sum( kernelExJ0 ) ) / ( pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Ey_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Ey_p = (0.d0,0.d0)
+    ! else
       kernelEyJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktmdz_J1 + ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Kte_J1
       kernelEyJ0 = ( y * y * Ktmdz_J0 + x * x * Kte_J0 ) * krJ0 / r ** 2
       Ey_p = -( sum( kernelEyJ1 ) + sum( kernelEyJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
-    if ( ehsingy == 1 ) then
-      Ez_p = (0.d0,0.d0)
-    else
+    ! end if
+    ! if ( ehsingy == 1 ) then
+    !   Ez_p = (0.d0,0.d0)
+    ! else
       kernelEzJ1 = ( y / ( r * condut( camad ) ) ) * Ktm_J1 * krJ1 * krJ1
       Ez_p = - sum( kernelEzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Hx_p = (1.d-25,1.d-25)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Hx_p = (1.d-25,1.d-25)
+    ! else
       kernelHxJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktm_J1 + ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Ktedz_J1
       kernelHxJ0 = ( y * y * Ktm_J0 + x * x * Ktedz_J0 ) * krJ0 / r ** 2
       Hx_p = -( sum( kernelHxJ1 ) + sum( kernelHxJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Hy_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Hy_p = (0.d0,0.d0)
+    ! else
       kernelHyJ1 = x * y * ( Ktm_J1 - Ktedz_J1 ) / r ** 3
       kernelHyJ0 = x * y * ( Ktm_J0 - Ktedz_J0 ) * krJ0 / ( 2.d0 * r * r )
       Hy_p = ( -sum( kernelHyJ1 ) + sum( kernelHyJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 ) then
-      Hz_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 ) then
+    !   Hz_p = (0.d0,0.d0)
+    ! else
       kernelHzJ1 = x / ( r * zeta ) * Kte_J1 * krJ1 * krJ1
       Hz_p = - sum( kernelHzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
   else if ( camad == camadT .and. z <= h0 ) then  !na mesma camada do transmissor mas acima dele
 
@@ -540,55 +540,55 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
                     RTEupJ1(:,camad) * FEupJ1(:) * exp( -uJ1(:,camad) * ( z - prof(camad - 1) ) ) - &
                     RTEdwJ1(:,camad) * FEdwJ1(:) * exp( uJ1(:,camad) * ( z - prof(camad) ) ) ) ) * w_J1(:)
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Ex_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Ex_p = (0.d0,0.d0)
+    ! else
       kernelExJ1 = x * y * ( Ktmdz_J1 - Kte_J1 ) / (r * r * r)
       kernelExJ0 = x * y * ( Ktmdz_J0 - Kte_J0 ) * krJ0 / ( 2.d0 * r * r )
       Ex_p = ( sum( kernelExJ1 ) - sum( kernelExJ0 ) ) / ( pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Ey_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Ey_p = (0.d0,0.d0)
+    ! else
       kernelEyJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktmdz_J1 + ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Kte_J1
       kernelEyJ0 = ( y * y * Ktmdz_J0 + x * x * Kte_J0 ) * krJ0 / r ** 2
       Ey_p = -( sum( kernelEyJ1 ) + sum( kernelEyJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingy == 1 ) then
-      Ez_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingy == 1 ) then
+    !   Ez_p = (0.d0,0.d0)
+    ! else
       if ( camad /= 0 ) then
               kernelEzJ1 = ( y / ( r * condut(camad) ) ) * Ktm_J1 * krJ1 * krJ1
       else
               kernelEzJ1 = ( y / ( r * neta ) ) * Ktm_J1 * krJ1 * krJ1
       end if
       Ez_p = -sum( kernelEzJ1 ) / ( 2.d0 * pi * r )       !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Hx_p = (1.d-25,1.d-25)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Hx_p = (1.d-25,1.d-25)
+    ! else
       kernelHxJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktm_J1 + ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Ktedz_J1
       kernelHxJ0 = ( y * y * Ktm_J0 + x * x * Ktedz_J0 ) * krJ0 / r ** 2
       Hx_p = -( sum( kernelHxJ1 ) + sum( kernelHxJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Hy_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Hy_p = (0.d0,0.d0)
+    ! else
       kernelHyJ1 = x * y * ( Ktm_J1 - Ktedz_J1 ) / r ** 3
       kernelHyJ0 = x * y * ( Ktm_J0 - Ktedz_J0 ) * krJ0 / ( 2.d0 * r * r )
       Hy_p = ( -sum( kernelHyJ1 ) + sum( kernelHyJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 ) then
-      Hz_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 ) then
+    !   Hz_p = (0.d0,0.d0)
+    ! else
       kernelHzJ1 = x / ( r * zeta ) * Kte_J1 * krJ1 * krJ1
       Hz_p = - sum( kernelHzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
   else if ( camad == camadT .and. z > h0 ) then !na mesma camada do transmissor mas abaixo dele
 
@@ -620,55 +620,55 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
                     RTEupJ1(:,camad) * FEupJ1(:) * exp( -uJ1(:,camad) * ( z - prof(camad - 1) ) ) - &
                     RTEdwJ1(:,camad) * FEdwJ1(:) * exp( uJ1(:,camad) * ( z - prof(camad) ) ) ) ) * w_J1(:)
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Ex_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Ex_p = (0.d0,0.d0)
+    ! else
       kernelExJ1 = x * y * ( Ktmdz_J1 + Kte_J1 ) / ( r * r * r )
       kernelExJ0 = x * y * ( Ktmdz_J0 + Kte_J0 ) * krJ0 / ( 2.d0 * r * r )
       Ex_p = ( -sum( kernelExJ1 ) + sum( kernelExJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Ey_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Ey_p = (0.d0,0.d0)
+    ! else
       kernelEyJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktmdz_J1 - ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Kte_J1
       kernelEyJ0 = ( y * y * Ktmdz_J0 - x * x * Kte_J0 ) * krJ0 / r ** 2
       Ey_p = ( sum( kernelEyJ1 ) + sum( kernelEyJ0 ) ) / ( 2.d0 * pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingy == 1 ) then
-      Ez_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingy == 1 ) then
+    !   Ez_p = (0.d0,0.d0)
+    ! else
       if ( camad /= 0 ) then
               kernelEzJ1 = ( y / ( r * condut(camad) ) ) * Ktm_J1 * krJ1 * krJ1
       else
               kernelEzJ1 = ( y / ( r * neta ) ) * Ktm_J1 * krJ1 * krJ1
       end if
       Ez_p = -sum( kernelEzJ1 ) / ( 2.d0 * pi * r )       !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Hx_p = (1.d-25,1.d-25)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Hx_p = (1.d-25,1.d-25)
+    ! else
       kernelHxJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktm_J1 - ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Ktedz_J1
       kernelHxJ0 = ( y * y * Ktm_J0 - x * x * Ktedz_J0 ) * krJ0 / r ** 2
       Hx_p = -( sum( kernelHxJ1 ) + sum( kernelHxJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Hy_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Hy_p = (0.d0,0.d0)
+    ! else
       kernelHyJ1 = x * y * ( Ktm_J1 + Ktedz_J1 ) / r ** 3
       kernelHyJ0 = x * y * ( Ktm_J0 + Ktedz_J0 ) * krJ0 / ( 2.d0 * r * r )
       Hy_p = ( -sum( kernelHyJ1 ) + sum( kernelHyJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 ) then
-      Hz_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 ) then
+    !   Hz_p = (0.d0,0.d0)
+    ! else
       kernelHzJ1 = x / ( r * zeta ) * Kte_J1 * krJ1 * krJ1
       Hz_p = - sum( kernelHzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
   else if ( camad > camadT .and. camad /= n ) then !camada j
 
@@ -692,51 +692,51 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
     Ktedz_J1 = ( AdmIntJ1(:,camad) * TEdwJ1(:,camad) * ( exp( -uJ1(:,camad) * ( z - prof(camad - 1) ) ) - &
                     RTEdwJ1(:,camad) * exp( uJ1(:,camad) * ( z - prof(camad) - h(camad) ) ) ) ) * w_J1(:)
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Ex_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Ex_p = (0.d0,0.d0)
+    ! else
       kernelExJ1 = x * y * ( Ktmdz_J1 + Kte_J1 ) / ( r * r * r )
       kernelExJ0 = x * y * ( Ktmdz_J0 + Kte_J0 ) * krJ0 / ( 2.d0 * r * r )
       Ex_p = ( -sum( kernelExJ1 ) + sum( kernelExJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Ey_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Ey_p = (0.d0,0.d0)
+    ! else
       kernelEyJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktmdz_J1 - ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Kte_J1
       kernelEyJ0 = ( y * y * Ktmdz_J0 - x * x * Kte_J0 ) * krJ0 / r ** 2
       Ey_p = ( sum( kernelEyJ1 ) + sum( kernelEyJ0 ) ) / ( 2.d0 * pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingy == 1 ) then
-      Ez_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingy == 1 ) then
+    !   Ez_p = (0.d0,0.d0)
+    ! else
       kernelEzJ1 = ( y / ( r * condut(camad) ) ) * Ktm_J1 * krJ1 * krJ1
       Ez_p = -sum( kernelEzJ1 ) / ( 2.d0 * pi * r )       !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Hx_p = (1.d-25,1.d-25)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Hx_p = (1.d-25,1.d-25)
+    ! else
       kernelHxJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktm_J1 - ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Ktedz_J1
       kernelHxJ0 = ( y * y * Ktm_J0 - x * x * Ktedz_J0 ) * krJ0 / r ** 2
       Hx_p = -( sum( kernelHxJ1 ) + sum( kernelHxJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Hy_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Hy_p = (0.d0,0.d0)
+    ! else
       kernelHyJ1 = x * y * ( Ktm_J1 + Ktedz_J1 ) / r ** 3
       kernelHyJ0 = x * y * ( Ktm_J0 + Ktedz_J0 ) * krJ0 / ( 2.d0 * r * r )
       Hy_p = ( -sum( kernelHyJ1 ) + sum( kernelHyJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 ) then
-      Hz_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 ) then
+    !   Hz_p = (0.d0,0.d0)
+    ! else
       kernelHzJ1 = x / ( r * zeta ) * Kte_J1 * krJ1 * krJ1
       Hz_p = - sum( kernelHzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
   else  !camada n
 
@@ -752,51 +752,51 @@ subroutine dmhx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
     Ktedz_J0 = ( AdmIntJ0(:,n) * TEdwJ0(:,n) * exp( -uJ0(:,n) * ( z - prof(n - 1) ) ) ) * w_J0(:)
     Ktedz_J1 = ( AdmIntJ1(:,n) * TEdwJ1(:,n) * exp( -uJ1(:,n) * ( z - prof(n - 1) ) ) ) * w_J1(:)
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Ex_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Ex_p = (0.d0,0.d0)
+    ! else
       kernelExJ1 = x * y * ( Ktmdz_J1 + Kte_J1 ) / ( r * r * r )
       kernelExJ0 = x * y * ( Ktmdz_J0 + Kte_J0 ) * krJ0 / ( 2.d0 * r * r )
       Ex_p = ( -sum( kernelExJ1 ) + sum( kernelExJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Ey_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Ey_p = (0.d0,0.d0)
+    ! else
       kernelEyJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktmdz_J1 - ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Kte_J1
       kernelEyJ0 = ( y * y * Ktmdz_J0 - x * x * Kte_J0 ) * krJ0 / r ** 2
       Ey_p = ( sum( kernelEyJ1 ) + sum( kernelEyJ0 ) ) / ( 2.d0 * pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingy == 1 ) then
-      Ez_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingy == 1 ) then
+    !   Ez_p = (0.d0,0.d0)
+    ! else
       kernelEzJ1 = ( y / ( r * condut(n) ) ) * Ktm_J1 * krJ1 * krJ1
       Ez_p = -sum( kernelEzJ1 ) / ( 2.d0 * pi * r )       !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingxy == 1 ) then
-      Hx_p = (1.d-25,1.d-25)
-    else
+    ! if ( ehsingxy == 1 ) then
+    !   Hx_p = (1.d-25,1.d-25)
+    ! else
       kernelHxJ1 = ( 1.d0 / r - 2.d0 * y ** 2 / r ** 3 ) * Ktm_J1 - ( 1.d0 / r - 2.d0 * x ** 2 / r ** 3 ) * Ktedz_J1
       kernelHxJ0 = ( y * y * Ktm_J0 - x * x * Ktedz_J0 ) * krJ0 / r ** 2
       Hx_p = -( sum( kernelHxJ1 ) + sum( kernelHxJ0 ) ) / ( 2.d0 * pi * r ) !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 .or. ehsingy == 1 ) then
-      Hy_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 .or. ehsingy == 1 ) then
+    !   Hy_p = (0.d0,0.d0)
+    ! else
       kernelHyJ1 = x * y * ( Ktm_J1 + Ktedz_J1 ) / r ** 3
       kernelHyJ0 = x * y * ( Ktm_J0 + Ktedz_J0 ) * krJ0 / ( 2.d0 * r * r )
       Hy_p = ( -sum( kernelHyJ1 ) + sum( kernelHyJ0 ) ) / ( pi * r )  !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
-    if ( ehsingx == 1 ) then
-      Hz_p = (0.d0,0.d0)
-    else
+    ! if ( ehsingx == 1 ) then
+    !   Hz_p = (0.d0,0.d0)
+    ! else
       kernelHzJ1 = x / ( r * zeta ) * Kte_J1 * krJ1 * krJ1
       Hz_p = - sum( kernelHzJ1 ) / ( 2.d0 * pi * r )        !este último r é decorrente do uso dos filtros
-    end if
+    ! end if
 
   end if
 
