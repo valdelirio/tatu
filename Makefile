@@ -37,4 +37,3 @@ $(build)/%.o: %.f08
 
 clean:
 	rm -rf $(build)
-	$(MAKE) -C json_io clean
