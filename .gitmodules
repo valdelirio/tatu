@@ -1,0 +1,3 @@
+[submodule "json_io"]
+	path = json_io
+	url = git@github.com:paulequilibrio/json_io.git

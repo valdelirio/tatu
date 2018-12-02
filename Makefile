@@ -1,41 +1,40 @@
-mod1d: Anderson.o computationalstuff.o filtros.o escolhadofiltro.o dehx.o dehy.o dev.o dmhx.o dmhy.o dmv.o csv_file.o main1D.o
-	gfortran -o mod1d.x Anderson.o computationalstuff.o filtros.o escolhadofiltro.o dehx.o dehy.o dev.o dmhx.o dmhy.o dmv.o csv_file.o main1D.o
+# Build directory path, where to put .o and .mod
+build = ./build
 
-Anderson.o: Anderson.for
-	gfortran -std=legacy -c Anderson.for
+# json-fortran dependencies
+json-fortran = json_module json_kinds json_parameters json_value_module json_string_utilities json_file_module
+# json_io dependencies
+json_io = cli file input_types json_io $(json-fortran)
+# Adds json_io build path and .o extension to each name of json_io variable
+json_io.o = $(patsubst %, $(build)/%.o, $(json_io))
 
-computationalstuff.o: computationalstuff.f08
-	gfortran -c computationalstuff.f08
+# If not exist, create build directory
+$(shell mkdir -p $(build))
+# Electromagnetics dipoles dependencies
+dependencies = Anderson computationalstuff filtros escolhadofiltro dehx dehy dev dmhx dmhy dmv csv_file main1D
+# Adds build path and .o extension to each one of json_io_files
+dependencies.o = $(patsubst %, $(build)/%.o, $(dependencies))
 
-filtros.o: filtros.f08
-	gfortran -c filtros.f08
 
-escolhadofiltro.o: escolhadofiltro.f08
-	gfortran -c escolhadofiltro.f08
+# Target to create executable binary
+mod1d.x: $(json_io.o) $(dependencies.o)
+# $(@) represents the current target, in this case: $(@) = mod1d.x
+# $(^) represents all dependencies of the current target, in this case: all .o files
+# -J specifies where to search for .mod files for compiled modules
+	gfortran -J$(build) -o $(@) $(^)
 
-dehx.o: dehx.f08
-	gfortran -c dehx.f08
+# Runs the first target of Makefile in ./json_io/json_io directory
+# Compile json_io module and all its dependencies
+$(build)/%.o: json_io/source/%.f08
+	$(MAKE) -C json_io
 
-dehy.o: dehy.f08
-	gfortran -c dehy.f08
+$(build)/Anderson.o: Anderson.for
+	gfortran -J$(build) -std=legacy -c $(<) -o $(@)
 
-dev.o: dev.f08
-	gfortran -c dev.f08
-
-dmhx.o: dmhx.f08
-	gfortran -c dmhx.f08
-
-dmhy.o: dmhy.f08
-	gfortran -c dmhy.f08
-
-dmv.o: dmv.f08
-	gfortran -c dmv.f08
-
-csv_file.o: csv_file.f08
-		gfortran -c csv_file.f08
-
-main1D.o: main1D.f08
-	gfortran -c main1D.f08
+$(build)/%.o: %.f08
+# $(<) represents the first dependency of the current target, in this case: $(<) = %.f08
+	gfortran -J$(build) -std=f2008 -pedantic -c $(<) -o $(@)
 
 clean:
-	rm *.o *.mod *.x
+	rm -rf $(build)
+	$(MAKE) -C json_io clean
