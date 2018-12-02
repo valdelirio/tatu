@@ -76,7 +76,7 @@ allocate(tmt(nT,3), mydirecT(nT))
   tmt(:,3) = Tz1 + (/(i,i=0,nT-1)/) * pT
   mydirecT = tmt(:,3)
 case default
-  stop'Error associated to transmitters! In direction, step, first or final coordinate!'
+  stop 'Error associated to transmitters! In direction, step, first or final coordinate!'
 end select
 
 !constructing array of receivers:
@@ -103,7 +103,7 @@ case ('z')
   rcv(:,3) = Rz1 + (/(i,i=0,nR-1)/) * pR
   mydirecR = rcv(:,3)
 case default
-  stop'Error associated to receivers! In direction, step, first or final coordinate!'
+  stop 'Error associated to receivers! In direction, step, first or final coordinate!'
 end select
 
 !constructing array of frequencies:
@@ -263,12 +263,12 @@ select case (sourceT)
       end do
     end do
   case default
-    stop'Source was entered incorretly'
+    stop 'Source was entered incorretly'
   end select
 ! the file output is stored in csv format
 ! The first line gives information about the columns.
 ! Each line registers the field components in each receiver at a certain frequency,
-! for a given transmitter position 
+! for a given transmitter position
 call csv_write_dble_2d(numfile, transpose(myout))
 
 call cpu_time(t2)
