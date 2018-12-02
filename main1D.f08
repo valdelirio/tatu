@@ -1,4 +1,5 @@
 program main1Dmod
+use json_io
 use computational_stuff
 use DMHx
 use DMHy
@@ -12,9 +13,6 @@ character(len=20) :: sourcetype, sourceT, iniposT, finposT, orienT, direcT, step
 character(len=20) :: iniposR, finposR, orienR, direcR, stepR
 character(len=20) :: inif, finf, numbf, numlay, hlay, reslay
 logical :: advance
-! character(len=10) :: namesrc, namefrq, namercv
-! character(len=10) :: namerEx, namerEy, namerEz, namerHx, namerHy, namerHz
-! character(len=10) :: nameiEx, nameiEy, nameiEz, nameiHx, nameiHy, nameiHz
 character(len=123) :: info
 integer :: ncam, nT, nR, nf, i, j, k, numfile, p !, q
 real(dp) :: t1, t2
@@ -23,35 +21,38 @@ real(dp) :: pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w !, myout(15)
 real(dp), dimension(:), allocatable :: resist, sigmas, h, freq, mydirecT, mydirecR
 real(dp), dimension(:,:), allocatable :: tmt, rcv, myout
 complex(dp) :: eta0, zeta, Exp, Eyp, Ezp, Hxp, Hyp, Hzp
-
-! write(*,*) sp,dp, selected_real_kind(20) !
-! read(*,*)
+type(input) :: inputs
 
 call cpu_time(t1)
-!reading input file
-open( unit = 100, file = 'input.in', status = 'old', action = 'read' )
-read(100,*)sourcetype, sourceT
 
-read(100,*)iniposT, Tx1, Ty1, Tz1
-read(100,*)orienT, direcT
-read(100,*)stepT, pT
-read(100,*)finposT, Tfin
+inputs = read_input()
 
-read(100,*)iniposR, Rx1, Ry1, Rz1
-read(100,*)orienR, direcR
-read(100,*)stepR, pR
-read(100,*)finposR, Rfin
+! getting input parameters
+sourceT = inputs%transmitter%model
+Tx1 = inputs%transmitter%initial%x
+Ty1 = inputs%transmitter%initial%y
+Tz1 = inputs%transmitter%initial%z
+direcT = inputs%transmitter%direction
+pT = inputs%transmitter%step
+Tfin = inputs%transmitter%final
 
-read(100,*)inif, fini
-read(100,*)numbf, nf
-read(100,*)finf, ffin
+Rx1 = inputs%receiver%initial%x
+Ry1 = inputs%receiver%initial%y
+Rz1 = inputs%receiver%initial%z
+direcR = inputs%receiver%direction
+pR = inputs%receiver%step
+Rfin = inputs%receiver%final
 
-read(100,*)numlay, ncam
-allocate(resist(ncam), sigmas(ncam), h(ncam-1))
-read(100,*)hlay, (h(i),i=1,ncam-1)
-read(100,*)reslay, (resist(i),i=1,ncam)
-close(100)
+fini = inputs%frequency%initial
+nf = inputs%frequency%samples
+ffin = inputs%frequency%final
+
+ncam = inputs%layers%number
+h = inputs%layers%thickness
+resist = inputs%layers%resistivity
+
 sigmas = 1.d0 / resist
+
 !constructing array of transmitters:
 select case (direcT)
 case ('x')
@@ -143,11 +144,11 @@ select case (sourceT)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call dehx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
-          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-                        real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
-          ! myout = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-          !           real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          ! myout = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+          !           real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           ! call csv_write_dble_1d(numfile, myout, advance)
         end do
       end do
@@ -168,8 +169,8 @@ select case (sourceT)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call dehy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
-          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-                        real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
@@ -190,8 +191,8 @@ select case (sourceT)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call dev_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
-          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-                        real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
@@ -212,8 +213,8 @@ select case (sourceT)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call dmhx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
-          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-                        real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
@@ -234,8 +235,8 @@ select case (sourceT)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call dmhy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
-          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-                        real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
@@ -256,8 +257,8 @@ select case (sourceT)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call dmv_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Hxp,Hyp,Hzp)
-          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),imag(Exp),real(Eyp),imag(Eyp),real(Ezp),imag(Ezp), &
-                        real(Hxp),imag(Hxp),real(Hyp),imag(Hyp),real(Hzp),imag(Hzp)/)
+          myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
