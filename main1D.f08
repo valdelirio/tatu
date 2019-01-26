@@ -2,12 +2,12 @@ program main1Dmod
 use cli
 use json_io
 use parameters
-use DMHx
-use DMHy
-use DMV
-use DEHx
-use DEHy
-use DEV
+use hmdx
+use hmdy
+use vmd
+use hedx
+use hedy
+use ved
 implicit none
 integer :: ncam, nT, nR, i, j, k, p
 real(dp) :: t1, t2, pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
@@ -111,7 +111,7 @@ labels(15) = 'HzImag'
 
 !selects source and determines eletromagnetic fields in receivers positions
 select case (in%transmitter%model)
-  case ('dehx')
+  case ('hedx')
     p = 1
     do i = 1,nT
       Tx = tmt(i,1)
@@ -126,14 +126,14 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call dehx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          call hedx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
     end do
-  case ('dehy')
+  case ('hedy')
     p = 1
     do i = 1,nT
       Tx = tmt(i,1)
@@ -148,14 +148,14 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call dehy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          call hedy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
     end do
-  case ('dev')
+  case ('ved')
     p = 1
     do i = 1,nT
       Tx = tmt(i,1)
@@ -177,7 +177,7 @@ select case (in%transmitter%model)
         end do
       end do
     end do
-  case ('dmhx')
+  case ('hmdx')
     p = 1
     do i = 1,nT
       Tx = tmt(i,1)
@@ -192,14 +192,14 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call dmhx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          call hmdx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
     end do
-  case ('dmhy')
+  case ('hmdy')
     p = 1
     do i = 1,nT
       Tx = tmt(i,1)
@@ -214,14 +214,14 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call dmhy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          call hmdy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
         end do
       end do
     end do
-  case ('dmv')
+  case ('vmd')
     p = 1
     do i = 1,nT
       Tx = tmt(i,1)
@@ -236,7 +236,7 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call dmv_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Hxp,Hyp,Hzp)
+          call vmd_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1

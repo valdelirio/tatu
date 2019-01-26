@@ -28,7 +28,7 @@ json_io.o = $(patsubst %, $(build)/%.o, $(json_io))
 # ELECTROMAGNETICS DIPOLES
 #--------------------------------------------------------------------
 # Electromagnetics dipoles dependencies
-dipoles = Anderson parameters filtros escolhadofiltro dehx dehy dev dmhx dmhy dmv main1D
+dipoles = Anderson parameters filtros escolhadofiltro hedx hedy ved hmdx hmdy vmd main1D
 # Adds build path and .o extension to each one of dipoles dependencies
 dipoles.o = $(patsubst %, $(build)/%.o, $(dipoles))
 #--------------------------------------------------------------------

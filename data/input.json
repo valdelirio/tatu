@@ -1,6 +1,6 @@
 {
   "transmitter": {
-    "model": "dehx",
+    "model": "hedx",
     "direction": "x",
     "initial": [-5e3, 0, 9.7e3],
     "step": 2.5e2,
