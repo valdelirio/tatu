@@ -270,9 +270,9 @@ select case (in%transmitter%model)
 call csv_write_dble_2d(numfile, transpose(myout))
 
 output_file = cli_get_option_value('-o')
-call json_io_write_output(output_file, in, labels, myout)
+call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
 
 call cpu_time(t2)
-write(*,*) 'Tempo processamento',t2-t1,'segundos'
+write(*,*) t2-t1
 
 end program main1Dmod
