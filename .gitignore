@@ -2,6 +2,8 @@
 # output files
 *.csv
 build/
+data/
+!data/input.json
 
 # Prerequisites
 *.d
