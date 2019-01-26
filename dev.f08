@@ -30,7 +30,7 @@ contains
   Hz_p = (0.d0,0.d0)
 
   if ( dabs(cx-Tx) < eps ) then
-    x=1.d-2
+    x=1.d-1
   else
     x=cx-Tx
   end if
@@ -95,12 +95,12 @@ contains
 !!  read(*,*)idtfcd_cJ1
 !!  call identfiltro(filtro,idtfcd_cJ1,ident_fJ1,nJ1)
 
-  idtfcd_cJ0 = 3
+  idtfcd_cJ0 = 5 !3
   ident_fJ0 = 0
-  nJ0 = 241
-  idtfcd_cJ1 = 3
+  nJ0 = 201  !241
+  idtfcd_cJ1 = 5 !3
   ident_fJ1 = 1
-  nJ1 = 241
+  nJ1 = 201  !241
 
   allocate(KrJ0(nJ0),KrJ1(nJ1),w_J0(nJ0),w_J1(nJ1))
 
@@ -454,7 +454,7 @@ contains
   real(dp), parameter :: eps = 1.d-7
   Hz_ky = (0.d0,0.d0)
   if ( dabs(cx-Tx) < eps ) then
-    x=1.d-2
+    x=1.d-1
   else
     x=cx-Tx
   end if
@@ -875,7 +875,7 @@ real(dp), parameter :: eps = 1.d-7
 Hz_ky = (0.d0,0.d0)
 
 if ( dabs(cx - Tx) < eps ) then
-  x=1.d-2
+  x=1.d-1
 else
   x=cx-Tx
 end if

@@ -16,7 +16,7 @@ contains
   integer::i,j,k,camad,camadT,filtro,idtfcd_cJ0,ident_fJ0,nJ0,idtfcd_cJ1,ident_fJ1,nJ1
   real(dp)::x,y,r
   real(dp),dimension(:),allocatable::h,krJ0,krJ1,w_J0,w_J1,prof
-  integer :: ehsingx, ehsingy, ehsingxy
+  integer :: ehsingx, ehsingy
 
 ! Para uso de loops:
   complex(dp),dimension(:),allocatable::wvnb2,AMdwJ0,AMdwJ1,AMupJ0,AMupJ1,FEdwJ0,FEdwJ1,FEupJ0,FEupJ1
@@ -30,22 +30,22 @@ contains
   complex(dp),dimension(:),allocatable::kernelHxJ0,kernelHxJ1,kernelHyJ0,kernelHyJ1,kernelHzJ1
   real(dp), parameter :: eps = 1.d-7
   if ( dabs(cx - Tx) < eps ) then
-    ! ehsingx = 1
-    x = 1.d-2
+    ehsingx = 1
+    x = 1.d-1
   else
-    ! ehsingx = 0
+    ehsingx = 0
     x = cx - Tx
   end if
   if ( dabs(cy - Ty) < eps ) then
-    ! ehsingy = 1
-    y = 1.d-2
+    ehsingy = 1
+    y = 1.d-1
   else
-    ! ehsingy = 0
+    ehsingy = 0
     y = cy - Ty
   end if
   if ( ehsingx == 1 .and. ehsingy == 1 ) then
     ! ehsingxy = 1
-    r = 1.d-2
+    r = 1.d-1
   else
     ! ehsingxy = 0
     r = dsqrt(x**2 + y**2)
@@ -109,12 +109,12 @@ contains
 !!  read(*,*)idtfcd_cJ1
 !!  call identfiltro(filtro,idtfcd_cJ1,ident_fJ1,nJ1)
 
-  idtfcd_cJ0 = 3
+  idtfcd_cJ0 = 5 !3
   ident_fJ0 = 0
-  nJ0 = 241
-  idtfcd_cJ1 = 3
+  nJ0 = 201  !241
+  idtfcd_cJ1 = 5 !3
   ident_fJ1 = 1
-  nJ1 = 241
+  nJ1 = 201  !241
 
   allocate(KrJ0(nJ0),KrJ1(nJ1),w_J0(nJ0),w_J1(nJ1))
 
@@ -797,9 +797,9 @@ contains
   complex(dp),dimension(:),allocatable::kernelEx,kernelEy,kernelEz,kernelHx,kernelHy,kernelHz
   real(dp), parameter :: eps = 1.d-7
   if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
-    x = dsign( 1.d-2, Tx )
+    x = dsign( 1.d-1, Tx )
   elseif ( dabs(cx - Tx) < eps .and. dabs(Tx) < eps ) then
-    x = 1.d-2
+    x = 1.d-1
   else
     x = cx - Tx
   end if
