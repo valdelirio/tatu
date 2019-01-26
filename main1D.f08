@@ -10,19 +10,19 @@ use DEHy
 use DEV
 use csv_file
 implicit none
-integer :: ncam, nT, nR, i, j, k, numfile, p
+integer :: ncam, nT, nR, i, j, k, p
 real(dp) :: t1, t2, pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
 real(dp), dimension(:), allocatable :: sigmas, h, freq, mydirecT, mydirecR
 real(dp), dimension(:,:), allocatable :: tmt, rcv, myout
 complex(dp) :: eta0, zeta, Exp, Eyp, Ezp, Hxp, Hyp, Hzp
-logical :: advance
 
-character(len=:), allocatable :: input_file, output_file, info
+character(len=:), allocatable :: input_file, output_file
 character(len=20), dimension(15) :: labels
 type(json_input) :: in
 
 call cpu_time(t1)
 
+allocate(character(1) :: input_file)
 input_file = cli_get_option_value('-i')
 in = json_io_read_input(input_file)
 
@@ -94,9 +94,6 @@ freq = in%frequency%initial * pf ** (/(i, i=0, in%frequency%samples - 1)/)
 allocate(myout(nT*in%frequency%samples*nR,15))
 !
 ! information about output file:
-info = 'transmitter, frequency, receiver, '&
-     //'ExReal, ExImag, EyReal, EyImag, EzReal, EzImag, '&
-     //'HxReal, HxImag, HyReal, HyImag, HzReal, HzImag'
 labels(1) = 'transmitter'
 labels(2) = 'frequency'
 labels(3) = 'receiver'
@@ -112,16 +109,6 @@ labels(12) = 'HyReal'
 labels(13) = 'HyImag'
 labels(14) = 'HzReal'
 labels(15) = 'HzImag'
-
-!advance = .true. faz com que o último argumento escrito no arquivo não tenha virgula depois dele.
-!Se advance = .false. então depois do argumento aparece uma virgula
-advance = .true.
-! numfile = 1000
-open(newunit=numfile,file='output.csv',status='replace',action='write')
-! written in first line of output file:
-! call csv_write_char( numfile, info, advance )
-write(numfile,*)info
-! the others lines are will insert in each iteration
 
 !selects source and determines eletromagnetic fields in receivers positions
 select case (in%transmitter%model)
@@ -263,12 +250,8 @@ select case (in%transmitter%model)
   case default
     stop 'Source was entered incorretly'
   end select
-! the file output is stored in csv format
-! The first line gives information about the columns.
-! Each line registers the field components in each receiver at a certain frequency,
-! for a given transmitter position
-call csv_write_dble_2d(numfile, transpose(myout))
 
+allocate(character(1) :: output_file)
 output_file = cli_get_option_value('-o')
 call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
 
