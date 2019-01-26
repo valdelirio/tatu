@@ -1,5 +1,5 @@
 module escolha_do_filtro
-  use computational_stuff
+  use parameters
   contains
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   subroutine identfiltro( tipofiltro, criador, idtfcd_f, np_f )

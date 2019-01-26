@@ -1,14 +1,13 @@
 program main1Dmod
 use cli
 use json_io
-use computational_stuff
+use parameters
 use DMHx
 use DMHy
 use DMV
 use DEHx
 use DEHy
 use DEV
-use csv_file
 implicit none
 integer :: ncam, nT, nR, i, j, k, p
 real(dp) :: t1, t2, pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
@@ -131,9 +130,6 @@ select case (in%transmitter%model)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
-          ! myout = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
-          !           real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
-          ! call csv_write_dble_1d(numfile, myout, advance)
         end do
       end do
     end do

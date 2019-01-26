@@ -1,5 +1,5 @@
 module DEHy
-use computational_stuff
+use parameters
 use escolha_do_filtro
 contains
 

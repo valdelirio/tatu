@@ -1,5 +1,5 @@
 module filtros_J0_J1_J2_sen_cos
-  use computational_stuff
+  use parameters
 ! The filters included in SenCosWer (wm_abs_201,wm_pes_sen201,wm_pes_cos201) subroutine was downloaded at
 ! https://github.com/empymod/empymod/releases/tag/v1.8.1
 
