@@ -170,7 +170,7 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call dev_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          call ved_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           p = p + 1
