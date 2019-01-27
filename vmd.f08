@@ -15,9 +15,6 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_p, Ey_p, Hx_p, Hy_p, Hz_p
 
-  ! real(dp), parameter :: pi = 3.141592653589793238462643383279502884197d0
-  ! real(dp), parameter :: mz = 1.d0
-  ! real(dp), parameter :: Iw = 1.d0
   integer :: i, j, k, camad, camadT, filtro, idtfcd_cJ0, ident_fJ0, nJ0, idtfcd_cJ1, ident_fJ1, nJ1
   real(dp) :: x, y, r
   real(dp), dimension(:), allocatable :: h, krJ0, krJ1, w_J0, w_J1, prof
@@ -64,7 +61,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
         end if
   end if
   prof(n) = 1.d300
-
+camad = 0
 !para descobrir em que camada está a observação
   if ( z <= 0.d0 ) then
     camad = 0
@@ -78,7 +75,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
             end if
         end do
   end if
-
+camadT = 0
 !para descobrir em que camada está o transmissor
   if ( h0 <= 0.d0 ) then
         camadT = 0
@@ -115,6 +112,9 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
 
   allocate( wvnb2(0 : n), uJ0(nJ0, 0 : n), uJ1(nJ1, 0 : n), AdmIntJ0(nJ0, 0 : n), AdmIntJ1(nJ1, 0 : n) )
   allocate( uhJ0(nJ0, 0 : n), uhJ1(nJ1, 0 : n), tghJ0(nJ0, 0 : n), tghJ1(nJ1, 0 : n) )
+! work around the warning: ... may be used uninitialized in this function
+  allocate( TEupJ0(1,1), TEupJ1(1,1) )
+  allocate( TEdwJ0(1,1), TEdwJ1(1,1) )
 !
   do i = 0, n
         if ( i == 0 ) then
@@ -199,6 +199,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
             ( 1.d0 - RTEupJ1(:,camadT) * RTEdwJ1(:,camadT) * exp( -2.d0 * uhJ1(:,camadT) ) )
 
   if ( camad > camadT ) then
+        deallocate(TEdwJ0, TEdwJ1)
         allocate( TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
         do j = camadT, camad
             if ( j == camadT ) then
@@ -237,6 +238,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
       end if
     end do
   else if ( camad < camadT ) then
+        deallocate(TEupJ0, TEupJ1)
         allocate( TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
         do j = camadT, camad, -1
             if ( j == camadT ) then
@@ -275,9 +277,9 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
       end if
     end do
   else
-
-        allocate( TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
-        allocate( TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
+    deallocate(TEdwJ0, TEdwJ1, TEupJ0, TEupJ1)
+    allocate( TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
+    allocate( TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
 
     TEdwJ0(:,camad) = zeta * mz / ( 2.d0 * uJ0(:,camadT) )
     TEdwJ1(:,camad) = zeta * mz / ( 2.d0 * uJ1(:,camadT) )
@@ -459,9 +461,6 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_ky, Ey_ky, Hx_ky, Hy_ky, Hz_ky
 
-  ! real(dp), parameter :: pi = 3.141592653589793238462643383279502884197d0
-  ! real(dp), parameter :: mz = 1.d0
-  ! real(dp), parameter :: Iw = 1.d0
   integer :: i, j, k, camad, camadT, autor, filtro, npts, nptc, funs, func
   real(dp) :: x
   real(dp), dimension(:), allocatable :: h, kxsen, kxcos, kr2sen, kr2cos, w_sen, w_cos, prof
@@ -505,7 +504,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
         end if
   end if
   prof(n) = 1.d300
-
+  camad = 0
 !para descobrir em que camada está a observação
   if ( z < 0.d0 ) then
         camad = 0
@@ -519,7 +518,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
             end if
         end do
   end if
-
+  camadT = 0
 !para descobrir em que camada está o transmissor
   if ( h0 < 0.d0 ) then
         camadT = 0
@@ -534,6 +533,9 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
         end do
   end if
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+! work around the warning: ... may be used uninitialized in this function
+allocate( TEupSen(1,1), TEupCos(1,1) )
+allocate( TEdwSen(1,1), TEdwCos(1,1) )
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   filtro = 1    !Designa o tipo de filtro usado na subrotina de pesos e abscisas de vários filtros.
           !O algarismo 0 é usado para J0 e J1, enquanto 1 é para seno e cosseno.
@@ -636,6 +638,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
         ( 1.d0 - RTEupCos(:,camadT) * RTEdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
 
   if ( camad > camadT ) then
+        deallocate(TEdwSen,TEdwCos)
         allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
         do j = camadT, camad
             if ( j == camadT ) then
@@ -674,6 +677,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
       end if
     end do
   else if ( camad < camadT ) then
+        deallocate( TEupSen, TEupCos)
         allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
         do j = camadT, camad, -1
             if ( j == camadT ) then
@@ -711,6 +715,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
       end if
     end do
   else
+        deallocate( TEupSen, TEupCos, TEdwSen, TEdwCos)
         allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
         allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
 
@@ -728,7 +733,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
 
   if ( camad == 0 .and. camadT /= 0 ) then
 
-        Kte_Sen = TEupSen(:,0) * exp( uSen(:,0) * z )
+    Kte_Sen = TEupSen(:,0) * exp( uSen(:,0) * z )
     Kte_Cos = TEupCos(:,0) * exp( uCos(:,0) * z )
 
     Ktedz_Sen = AdmIntSen(:,0) * Kte_Sen
@@ -749,7 +754,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
     kernelHz = ( kxcos * kxcos + ky * ky ) * Kte_Cos * w_cos / zeta
     Hz_ky = sum( kernelHz ) / ( pi * dabs(x) )
 
-  else if ( camad < camadT ) then !camada k
+  else if ( camad < camadT ) then !layer k
 
     Kte_Sen = TEupSen(:,camad) * ( exp( uSen(:,camad) * ( z - prof(camad) ) ) + &
                 RTEupSen(:,camad) * exp( -uSen(:,camad) * ( z - prof(camad - 1) + h(camad) ) ) )
@@ -776,7 +781,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
     kernelHz = ( kxcos * kxcos + ky * ky ) * Kte_Cos * w_cos / zeta
     Hz_ky = sum( kernelHz ) / ( pi * dabs(x) )
 
-  else if ( camad == camadT .and. z <= h0 ) then  !na mesma camada do transmissor mas acima dele
+  else if ( camad == camadT .and. z <= h0 ) then  !in the same layer, but receiver above transmitter
 
     Kte_Sen = TEupSen(:,camad) * ( exp( uSen(:,camad) * ( z - h0 ) ) + &
                 RTEupSen(:,camad) * FEupSen(:) * exp( -uSen(:,camad) * ( z - prof(camad - 1) ) ) + &
@@ -806,7 +811,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
     kernelHz = ( kxcos * kxcos + ky * ky ) * Kte_Cos * w_cos / zeta
     Hz_ky = sum( kernelHz ) / ( pi * dabs(x) )
 
-  else if ( camad == camadT .and. z > h0 ) then !na mesma camada do transmissor mas abaixo dele
+  else if ( camad == camadT .and. z > h0 ) then !in the same layer, but receiver below transmitter
 
     Kte_Sen = TEdwSen(:,camad) * ( exp( -uSen(:,camad) * ( z - h0 ) ) + &
       RTEupSen(:,camad) * FEupSen(:) * exp( -uSen(:,camad) * ( z - prof(camad - 1) ) ) + &
@@ -837,7 +842,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
     kernelHz = ( kxcos * kxcos + ky * ky ) * Kte_Cos * w_cos / zeta
     Hz_ky = sum( kernelHz ) / ( pi * dabs(x) )
 
-  else if ( camad > camadT .and. camad /= n ) then !camada j
+  else if ( camad > camadT .and. camad /= n ) then !layer j
 
     Kte_Sen = TEdwSen(:,camad) * ( exp( -uSen(:,camad) * ( z - prof(camad - 1) ) ) + &
       RTEdwSen(:,camad) * exp( uSen(:,camad) * ( z - prof(camad) - h(camad) ) ) )
@@ -864,7 +869,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
     kernelHz = ( kxcos * kxcos + ky * ky ) * Kte_Cos * w_cos / zeta
     Hz_ky = sum( kernelHz ) / ( pi * dabs(x) )
 
-  else  !camada n
+  else  !layer n
 
     Kte_Sen = TEdwSen(:,n) * exp( -uSen(:,n) * ( z - prof(n - 1) ) )
     Kte_Cos = TEdwCos(:,n) * exp( -uCos(:,n) * ( z - prof(n - 1) ) )

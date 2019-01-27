@@ -15,9 +15,6 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_p, Ey_p, Ez_p, Hx_p, Hy_p, Hz_p
 
-  ! real(dp), parameter :: pi = 3.141592653589793238462643383279502884197d0
-  ! real(dp), parameter :: mx = 1.d0
-  ! real(dp), parameter :: Iw = 1.d0
   integer :: i, j, k, camad, camadT, filtro, idtfcd_cJ0, ident_fJ0, nJ0, idtfcd_cJ1, ident_fJ1, nJ1
   real(dp) :: x, y, r
   real(dp), dimension(:), allocatable :: h, krJ0, krJ1, w_J0, w_J1, prof
@@ -81,6 +78,7 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   prof(n) = 1.d300
 
 !para descobrir em que camada está a observação
+  camad = 0
   if (z <= 0.d0) then
     camad = 0
   else if (z > prof(n - 1)) then
@@ -95,6 +93,7 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   end if
 
 !para descobrir em que camada está o transmissor
+  camadT = 0
   if ( h0 <= 0.d0 ) then
     camadT = 0
   else if ( h0 > prof(n - 1) ) then
@@ -107,6 +106,10 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
             end if
         end do
   end if
+! To workaround the warning: ... may be used uninitialized in this function
+  allocate( TMdwJ0(1,1), TMdwJ1(1,1), TEdwJ0(1,1), TEdwJ1(1,1) )
+  allocate( TMupJ0(1,1), TMupJ1(1,1), TEupJ0(1,1), TEupJ1(1,1) )
+
 
 !!  write(*,*)'Entre com o criador dos filtros J0: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3) ou Key(4)'
 !!  read(*,*)idtfcd_cJ0
@@ -257,7 +260,8 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
       ( 1.d0 - RTEupJ1(:,camadT) * RTEdwJ1(:,camadT) * exp( -2.d0 * uhJ1(:,camadT) ) )
 
   if ( camad > camadT ) then
-  allocate( TMdwJ0(nJ0,camadT : camad), TMdwJ1(nJ1,camadT : camad), TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
+    deallocate( TMdwJ0, TMdwJ1, TEdwJ0, TEdwJ1)
+    allocate( TMdwJ0(nJ0,camadT : camad), TMdwJ1(nJ1,camadT : camad), TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
         do j = camadT, camad
       if ( j == camadT ) then
 
@@ -313,7 +317,8 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
       end if
     end do
   else if ( camad < camadT ) then
-  allocate( TMupJ0(nJ0,camad : camadT), TMupJ1(nJ1,camad : camadT), TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
+    deallocate( TMupJ0, TMupJ1, TEupJ0, TEupJ1 )
+    allocate( TMupJ0(nJ0,camad : camadT), TMupJ1(nJ1,camad : camadT), TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
     do j = camadT, camad, -1
       if ( j == camadT ) then
 
@@ -369,8 +374,9 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
       end if
     end do
   else
-  allocate( TMdwJ0(nJ0,camadT : camad), TMdwJ1(nJ1,camadT : camad), TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
-  allocate( TMupJ0(nJ0,camad : camadT), TMupJ1(nJ1,camad : camadT), TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
+    deallocate( TMdwJ0, TMdwJ1, TEdwJ0, TEdwJ1, TMupJ0, TMupJ1, TEupJ0, TEupJ1 )
+    allocate( TMdwJ0(nJ0,camadT : camad), TMdwJ1(nJ1,camadT : camad), TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
+    allocate( TMupJ0(nJ0,camad : camadT), TMupJ1(nJ1,camad : camadT), TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
 
       TMdwJ0(:,camad) = zeta * mx / ( 2.d0 * ImpIntJ0(:,camadT) )
       TMdwJ1(:,camad) = zeta * mx / ( 2.d0 * ImpIntJ1(:,camadT) )
@@ -823,9 +829,6 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_ky, Ey_ky, Ez_ky, Hx_ky, Hy_ky, Hz_ky
 
-  ! real(dp), parameter :: pi = 3.141592653589793238462643383279502884197d0
-  ! real(dp), parameter :: mx = 1.d0
-  ! real(dp), parameter :: Iw = 1.d0
   integer :: i, j, k, camad, camadT, autor, filtro, npts, nptc, funs, func
   real(dp) :: x
   real(dp), dimension(:), allocatable :: h, kxsen, kxcos, kr2sen, kr2cos, w_sen, w_cos, prof
@@ -873,6 +876,7 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   prof(n) = 1.d300
 
 !para descobrir em que camada está a observação
+  camad = 0
   if ( z < 0.d0 ) then
     camad = 0
   else if ( z >= prof(n - 1) ) then
@@ -887,6 +891,7 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   end if
 
 !para descobrir em que camada está o transmissor
+  camadT = 0
   if ( h0 < 0.d0 ) then
     camadT = 0
   else if ( h0 >= prof(n - 1) ) then
@@ -900,6 +905,11 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
         end do
   end if
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+! to workaround the warning: ... may be used uninitialized in this function
+allocate( TMupSen(1,1), TMupCos(1,1) )
+allocate( TEupSen(1,1), TEupCos(1,1) )
+allocate( TMdwSen(1,1), TMdwCos(1,1) )
+allocate( TEdwSen(1,1), TEdwCos(1,1) )
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   filtro = 1  !Designa o tipo de filtro usado na subrotina de pesos e abscisas de vários filtros.
         !O algarismo 0 é usado para J0 e J1, enquanto 1 é para seno e cosseno.
@@ -980,7 +990,7 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
 
     end if
   end do
-  RTEdwSen(:,0) = ( AdmIntSen(:,0) - AdmApdwSen(:,1) ) / ( AdmIntSen(:,0) + AdmApdwSen(:,1) )
+    RTEdwSen(:,0) = ( AdmIntSen(:,0) - AdmApdwSen(:,1) ) / ( AdmIntSen(:,0) + AdmApdwSen(:,1) )
     RTEdwCos(:,0) = ( AdmIntCos(:,0) - AdmApdwCos(:,1) ) / ( AdmIntCos(:,0) + AdmApdwCos(:,1) )
     RTMdwSen(:,0) = ( ImpIntSen(:,0) - ImpApdwSen(:,1) ) / ( ImpIntSen(:,0) + ImpApdwSen(:,1) )
     RTMdwCos(:,0) = ( ImpIntCos(:,0) - ImpApdwCos(:,1) ) / ( ImpIntCos(:,0) + ImpApdwCos(:,1) )
@@ -1017,7 +1027,7 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
 
     end if
   end do
-  RTEupSen(:,n)=(AdmIntSen(:,n)-AdmApupSen(:,n-1))/(AdmIntSen(:,n)+AdmApupSen(:,n-1))
+    RTEupSen(:,n)=(AdmIntSen(:,n)-AdmApupSen(:,n-1))/(AdmIntSen(:,n)+AdmApupSen(:,n-1))
     RTEupCos(:,n)=(AdmIntCos(:,n)-AdmApupCos(:,n-1))/(AdmIntCos(:,n)+AdmApupCos(:,n-1))
     RTMupSen(:,n)=(ImpIntSen(:,n)-ImpApupSen(:,n-1))/(ImpIntSen(:,n)+ImpApupSen(:,n-1))
     RTMupCos(:,n)=(ImpIntCos(:,n)-ImpApupCos(:,n-1))/(ImpIntCos(:,n)+ImpApupCos(:,n-1))
@@ -1054,8 +1064,9 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
         ( 1.d0 - RTEupCos(:,camadT) * RTEdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
 
   if ( camad > camadT ) then
-        allocate( TMdwSen(npts,camadT : camad), TMdwCos(nptc,camadT : camad) )
-        allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
+    deallocate( TMdwSen, TMdwCos, TEdwSen, TEdwCos )
+    allocate( TMdwSen(npts,camadT : camad), TMdwCos(nptc,camadT : camad) )
+    allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
     do j = camadT, camad
       if ( j == camadT ) then
 
@@ -1113,8 +1124,9 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
       end if
     end do
   else if ( camad < camadT ) then
-        allocate( TMupSen(npts,camad : camadT), TMupCos(nptc,camad : camadT) )
-        allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
+    deallocate( TMupSen, TMupCos, TEupSen, TEupCos )
+    allocate( TMupSen(npts,camad : camadT), TMupCos(nptc,camad : camadT) )
+    allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
     do j = camadT, camad, -1
       if ( j == camadT ) then
 
@@ -1172,10 +1184,11 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
       end if
     end do
   else
-        allocate( TMdwSen(npts,camadT : camad), TMdwCos(nptc,camadT : camad) )
-        allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
-        allocate( TMupSen(npts,camad : camadT), TMupCos(nptc,camad : camadT) )
-        allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
+    deallocate( TMupSen, TMupCos, TEupSen, TEupCos, TMdwSen, TMdwCos, TEdwSen, TEdwCos )
+    allocate( TMdwSen(npts,camadT : camad), TMdwCos(nptc,camadT : camad) )
+    allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
+    allocate( TMupSen(npts,camad : camadT), TMupCos(nptc,camad : camadT) )
+    allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
 
     TMdwSen(:,camad) = zeta * mx / (2.d0 * ImpIntSen(:,camadT))
       TMdwCos(:,camad) = zeta * mx / (2.d0 * ImpIntCos(:,camadT))

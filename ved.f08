@@ -2,16 +2,13 @@ module ved
 use parameters
 use escolha_do_filtro
 contains
-  subroutine dev_xyz_loops(Tx,Ty,h0,n,esp,condut,neta,zeta,cx,cy,z,Ex_p,Ey_p,Ez_p,Hx_p,Hy_p,Hz_p)
+  subroutine ved_xyz_loops(Tx,Ty,h0,n,esp,condut,neta,zeta,cx,cy,z,Ex_p,Ey_p,Ez_p,Hx_p,Hy_p,Hz_p)
   implicit none
   integer,intent(in)::n
   real(dp),intent(in)::Tx,Ty,h0,esp(:),condut(1:n),cx,cy,z !,neta
   complex(dp),intent(in)::zeta,neta
   complex(dp),intent(out)::Ex_p,Ey_p,Ez_p,Hx_p,Hy_p,Hz_p
 
-  ! real(dp),parameter::pi=3.141592653589793238462643383279502884197d0
-  ! real(dp), parameter :: dsz = 1.d0 !momento
-  ! real(dp), parameter :: Iw = 1.d0 !corrente eletrica
   integer::i,j,k,camad,camadT,filtro,idtfcd_cJ0,ident_fJ0,nJ0,idtfcd_cJ1,ident_fJ1,nJ1
   real(dp)::x,y,r
   real(dp),dimension(:),allocatable::h,krJ0,krJ1,w_J0,w_J1,prof
@@ -60,6 +57,7 @@ contains
   prof(n)=1.d300
 
 !para descobrir em que camada está a observação
+  camad = 0
   if (z <= 0.d0) then
     camad=0
   else if (z > prof(n-1)) then
@@ -74,6 +72,7 @@ contains
   end if
 
 !para descobrir em que camada está o transmissor
+  camadT = 0
   if (h0 <= 0.d0) then
     camadT = 0
   else if (h0 > prof(n-1)) then
@@ -86,7 +85,10 @@ contains
   end if
   end do
   end if
-
+!
+! To workaround the warning: ... may be used uninitialized in this function
+allocate( TMdwJ0(1,1), TMdwJ1(1,1), TMupJ0(1,1), TMupJ1(1,1) )
+!
 !!  write(*,*)'Entre com o criador dos filtros J0: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3) ou Key(4)'
 !!  read(*,*)idtfcd_cJ0
   filtro=0  !esta variável direciona o uso de filtros J0 e J1 em vez de seno e cosseno
@@ -190,7 +192,8 @@ contains
         (1.d0-RTMupJ1(:,camadT)*RTMdwJ1(:,camadT)*exp(-2.d0*uhJ1(:,camadT)))
 
   if (camad > camadT) then
-  allocate(TMdwJ0(nJ0,camadT:camad),TMdwJ1(nJ1,camadT:camad))
+    deallocate( TMdwJ0, TMdwJ1 )
+    allocate(TMdwJ0(nJ0,camadT:camad),TMdwJ1(nJ1,camadT:camad))
     do j=camadT,camad
       if (j == camadT) then
       TMdwJ0(:,j)= Iw * dsz / (2.d0*uJ0(:,camadT))
@@ -220,7 +223,8 @@ contains
       end if
     end do
   elseif (camad < camadT) then
-  allocate(TMupJ0(nJ0,camad:camadT),TMupJ1(nJ1,camad:camadT))
+    deallocate(TMupJ0, TMupJ1)
+    allocate(TMupJ0(nJ0,camad:camadT),TMupJ1(nJ1,camad:camadT))
     do j=camadT,camad,-1
       if (j == camadT) then
       TMupJ0(:,j)= Iw * dsz / (2.d0*uJ0(:,camadT))
@@ -250,8 +254,9 @@ contains
       end if
     end do
   else
-  allocate(TMdwJ0(nJ0,camadT:camad),TMdwJ1(nJ1,camadT:camad))
-  allocate(TMupJ0(nJ0,camad:camadT),TMupJ1(nJ1,camad:camadT))
+    deallocate( TMdwJ0, TMdwJ1, TMupJ0,TMupJ1 )
+    allocate(TMdwJ0(nJ0,camadT:camad),TMdwJ1(nJ1,camadT:camad))
+    allocate(TMupJ0(nJ0,camad:camadT),TMupJ1(nJ1,camad:camadT))
       TMdwJ0(:,camad)= Iw * dsz / (2.d0*uJ0(:,camadT))
       TMdwJ1(:,camad)= Iw * dsz / (2.d0*uJ1(:,camadT))
       TMupJ0(:,camad)= Iw * dsz / (2.d0*uJ0(:,camadT))
@@ -419,7 +424,7 @@ contains
   deallocate(Ktmdz_J1,Ktm_J0,Ktm_J1)
   deallocate(kernelExJ1,kernelEyJ1,kernelEzJ0)
   deallocate(kernelHxJ1,kernelHyJ1)
-  end subroutine dev_xyz_loops
+  end subroutine ved_xyz_loops
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -427,16 +432,13 @@ contains
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  subroutine dev_xkyz_loops(Tx,ky,h0,n,esp,condut,neta,zeta,cx,z,Ex_ky,Ey_ky,Ez_ky,Hx_ky,Hy_ky,Hz_ky)
+  subroutine ved_xkyz_loops(Tx,ky,h0,n,esp,condut,neta,zeta,cx,z,Ex_ky,Ey_ky,Ez_ky,Hx_ky,Hy_ky,Hz_ky)
   implicit none
   integer,intent(in)::n
   real(dp),intent(in)::Tx,ky,h0,esp(:),condut(1:n),cx,z    !,neta
   complex(dp),intent(in)::zeta,neta
   complex(dp),intent(out)::Ex_ky,Ey_ky,Ez_ky,Hx_ky,Hy_ky,Hz_ky
 
-  ! real(dp),parameter::pi=3.141592653589793238462643383279502884197d0
-  ! real(dp), parameter :: dsz = 1.d0 !momento
-  ! real(dp), parameter :: Iw = 1.d0 !corrente eletrica
   integer::i,j,k,camad,camadT,autor,filtro,npts,nptc,funs,func
   real(dp)::x
   real(dp),dimension(:),allocatable::h,kxsen,kxcos,kr2sen,kr2cos,w_sen,w_cos,prof
@@ -482,6 +484,7 @@ contains
   prof(n)=1.d300
 
 !para descobrir em que camada está a observação
+  camad = 0
   if (z <= 0.d0) then
     camad=0
   else if (z > prof(n-1)) then
@@ -496,6 +499,7 @@ contains
   end if
 
 !para descobrir em que camada está o transmissor
+  camadT = 0
   if (h0 <= 0.d0) then
     camadT = 0
   else if (h0 > prof(n-1)) then
@@ -509,6 +513,9 @@ contains
   end do
   end if
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+! to workaround the warning: ... may be used uninitialized in this function
+allocate( TMdwSen(1,1), TMdwCos(1,1) )
+allocate( TMupSen(1,1), TMupCos(1,1) )
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   filtro=1  !Designa o tipo de filtro usado na subrotina de pesos e abscisas de vários filtros.
         !O algarismo 0 é usado para J0 e J1, enquanto 1 é para seno e cosseno.
@@ -610,7 +617,8 @@ contains
         (1.d0-RTMupCos(:,camadT)*RTMdwCos(:,camadT)*exp(-2.d0*uhCos(:,camadT)))
 
   if (camad > camadT) then
-  allocate(TMdwSen(npts,camadT:camad),TMdwCos(nptc,camadT:camad))
+    deallocate( TMdwSen, TMdwCos )
+    allocate(TMdwSen(npts,camadT:camad),TMdwCos(nptc,camadT:camad))
     do j=camadT,camad
       if (j == camadT) then
       TMdwSen(:,j)= Iw * dsz / (2.d0*uSen(:,camadT))
@@ -640,7 +648,8 @@ contains
       end if
     end do
   elseif (camad < camadT) then
-  allocate(TMupSen(npts,camad:camadT),TMupCos(nptc,camad:camadT))
+    deallocate( TMupSen, TMupCos )
+    allocate(TMupSen(npts,camad:camadT),TMupCos(nptc,camad:camadT))
     do j=camadT,camad,-1
       if (j == camadT) then
       TMupSen(:,j)= Iw * dsz / (2.d0*uSen(:,camadT))
@@ -670,8 +679,9 @@ contains
       end if
     end do
   else
-  allocate(TMdwSen(npts,camadT:camad),TMdwCos(nptc,camadT:camad))
-  allocate(TMupSen(npts,camad:camadT),TMupCos(nptc,camad:camadT))
+    deallocate( TMdwSen, TMdwCos, TMupSen,TMupCos )
+    allocate(TMdwSen(npts,camadT:camad),TMdwCos(nptc,camadT:camad))
+    allocate(TMupSen(npts,camad:camadT),TMupCos(nptc,camad:camadT))
       TMdwSen(:,camad)= Iw * dsz / (2.d0*uSen(:,camadT))
       TMdwCos(:,camad)= Iw * dsz / (2.d0*uCos(:,camadT))
       TMupSen(:,camad)= Iw * dsz / (2.d0*uSen(:,camadT))
@@ -851,27 +861,28 @@ contains
   deallocate(Ktmdz_Sen,Ktmdz_Cos,Ktm_Sen,Ktm_Cos)
   deallocate(kernelEx,kernelEy,kernelEz,kernelHx,kernelHy)
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  end subroutine dev_xkyz_loops
-!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-subroutine dev_xkyz(Tx,ky,h0,n,esp,condut,neta,zeta,cx,z,Ex_ky,Ey_ky,Ez_ky,Hx_ky,Hy_ky,Hz_ky)
+  end subroutine ved_xkyz_loops
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+subroutine ved_xkyz(Tx,ky,h0,n,esp,condut,neta,zeta,cx,z,Ex_ky,Ey_ky,Ez_ky,Hx_ky,Hy_ky,Hz_ky)
 implicit none
 integer,intent(in)::n
 real(dp),intent(in)::Tx,ky,h0,esp(:),condut(1:n),cx,z    !,neta
 complex(dp),intent(in)::zeta,neta
 complex(dp),intent(out)::Ex_ky,Ey_ky,Ez_ky,Hx_ky,Hy_ky,Hz_ky
 
-! real(dp),parameter::pi=3.141592653589793238462643383279502884197d0
-! real(dp), parameter :: dsz = 1.d0 !momento
-! real(dp), parameter :: Iw = 1.d0 !corrente eletrica
 integer::i,j,k,camad,camadT,autor,filtro,npts,nptc,funs,func
 real(dp)::x,kx
 real(dp),dimension(:),allocatable::h,kxsen,kxcos,w_sen,w_cos,prof
 
-complex(dp)::kerEx,kerEy,kerEz
-complex(dp)::kerHx,kerHy
 real(dp), parameter :: eps = 1.d-7
+
+complex(dp) :: kerEx, kerEy, kerEz, kerHx, kerHy
 Hz_ky = (0.d0,0.d0)
 
 if ( dabs(cx - Tx) < eps ) then
@@ -943,7 +954,8 @@ allocate(kxsen(npts),kxcos(nptc),w_sen(npts),w_cos(nptc))
 
 call constfiltro(filtro,autor,funs,npts,x,Kxsen,w_sen)
 call constfiltro(filtro,autor,func,nptc,x,Kxcos,w_cos)
-
+kerEx = 0.d0; kerEy = 0.d0; kerEz = 0.d0;
+kerHx = 0.d0; kerHy = 0.d0;
 if (camad == 0 .and. camadT /= 0) then
 
   kerEx = (0.d0,0.d0)
@@ -1850,14 +1862,14 @@ return
 end function KHyn
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-end subroutine dev_xkyz
+end subroutine ved_xkyz
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-!   subroutine dev_xyz(filAnd,Tx,Ty,h0,n,esp,condut,neta,zeta,cx,cy,z,Ex_p,Ey_p,Ez_p,Hx_p,Hy_p,Hz_p)
+!   subroutine ved_xyz(filAnd,Tx,Ty,h0,n,esp,condut,neta,zeta,cx,cy,z,Ex_p,Ey_p,Ez_p,Hx_p,Hy_p,Hz_p)
 !   implicit none
 !   integer,intent(in)::filAnd,n
 !   real(dp),intent(in)::Tx,Ty,h0,esp(:),condut(1:n),cx,cy,z !,neta
@@ -2924,7 +2936,7 @@ end subroutine dev_xkyz
 !   end function KHyn_J1
 ! !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ! !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-!   end subroutine dev_xyz
+!   end subroutine ved_xyz
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
