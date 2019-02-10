@@ -243,8 +243,6 @@ select case (in%transmitter%model)
         end do
       end do
     end do
-  case default
-    stop 'Source was entered incorretly'
   end select
 
 allocate(character(1) :: output_file)
