@@ -53,6 +53,11 @@ $(build)/%.o: %.f08
 # $(<) represents the first dependency of the current target, in this case: $(<) = %.f08
 	$(fc) $(flags) -c $(<) -o $(@)
 
+# Compile files inside models subdirectory
+$(build)/%.o: models/%.f08
+# $(<) represents the first dependency of the current target, in this case: $(<) = %.f08
+	$(fc) $(flags) -c $(<) -o $(@)
+
 clean:
 	rm -rf $(build)
 	rm -rf *.x
