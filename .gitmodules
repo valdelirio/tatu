@@ -1,3 +1,6 @@
 [submodule "json_io"]
 	path = json_io
 	url = https://github.com/paulequilibrio/json_io.git
+[submodule "clifor"]
+	path = clifor
+	url = https://github.com/paulequilibrio/clifor.git
