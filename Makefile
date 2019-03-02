@@ -12,6 +12,14 @@ flags = $(production_flags)
 # If not exist, create build directory
 $(shell mkdir -p $(build))
 
+# CLIFor
+#--------------------------------------------------------------------
+# clifor dependencies from file
+include clifor/dependencies.make
+# Adds build path and .o extension to each one of clifor dependencies
+clifor.o = $(patsubst %, $(build)/%.o, $(clifor))
+#--------------------------------------------------------------------
+
 # JSON_IO
 #--------------------------------------------------------------------
 # json-fortran dependencies from file
@@ -24,22 +32,25 @@ json-fortran.o = $(patsubst %, $(build)/%.o, $(json-fortran))
 json_io.o = $(patsubst %, $(build)/%.o, $(json_io))
 #--------------------------------------------------------------------
 
-
 # ELECTROMAGNETICS DIPOLES
 #--------------------------------------------------------------------
-# Electromagnetics dipoles dependencies
-dipoles = Anderson parameters filtros escolhadofiltro hedx hedy ved hmdx hmdy vmd main1D
+# dipoles dependencies from file
+include ./dependencies.make
 # Adds build path and .o extension to each one of dipoles dependencies
 dipoles.o = $(patsubst %, $(build)/%.o, $(dipoles))
 #--------------------------------------------------------------------
 
 
 # Target to create executable binary
-main1D.x: $(json_io.o) $(json-fortran.o) $(dipoles.o)
-# $(@) represents the current target, in this case: $(@) = mod1d.x
+main1D.x: $(json_io.o) $(json-fortran.o) $(clifor.o) $(dipoles.o)
+# $(@) represents the current target, in this case: $(@) = main1D.x
 # $(^) represents all dependencies of the current target, in this case: all .o files
 # -J specifies where to search for .mod files for compiled modules
 	$(fc) $(flags) -o $(@) $(^)
+
+# Compile clifor module and all its dependencies
+$(build)/%.o: clifor/source/%.f08
+	$(MAKE) -C clifor
 
 # Runs the first target of Makefile in ./json_io/json_io directory
 # Compile json_io module and all its dependencies (json-fortran included)
@@ -51,6 +62,10 @@ $(build)/Anderson.o: Anderson.for
 
 $(build)/%.o: %.f08
 # $(<) represents the first dependency of the current target, in this case: $(<) = %.f08
+	$(fc) $(flags) -c $(<) -o $(@)
+
+# Compile files inside models subdirectory
+$(build)/%.o: models/%.f08
 	$(fc) $(flags) -c $(<) -o $(@)
 
 clean:

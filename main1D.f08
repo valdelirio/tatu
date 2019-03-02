@@ -1,5 +1,5 @@
 program main1Dmod
-use cli
+use clifor
 use json_io
 use parameters
 use hmdx
@@ -21,8 +21,37 @@ type(json_input) :: in
 
 call cpu_time(t1)
 
+call clifor_set_program_info( &
+  name='main1D.x', &
+  version='0.1.0', &
+  pretty_name='Electromagnetics Dipoles 1D Modeling', &
+  description='Fortran program to 1D Electromagnetic Modeling' &
+)
+
+call clifor_create_option('v', 'version', 'Show version and exit')
+call clifor_create_option('h', 'help', 'Show this help message')
+call clifor_create_option('i', 'input-file', 'File to read the input data', &
+                              required=.true., need_value=.true., value_name='FILEPATH')
+call clifor_create_option('o', 'output-file', 'File to write the output data', &
+                              required=.true., need_value=.true., value_name='FILEPATH')
+! call clifor_create_option('f', 'format', 'Output file format: json (default) or ssv')
+
+call clifor_read_command_line
+
+if (clifor_flag_was_provided('help')) call clifor_show_program_help
+if (clifor_flag_was_provided('version')) call clifor_show_program_version
+
+call clifor_ensure_required_options
+
 allocate(character(1) :: input_file)
-input_file = cli_get_option_value('-i')
+input_file = clifor_get_value_from_option('input-file')
+
+allocate(character(1) :: output_file)
+output_file = clifor_get_value_from_option('output-file')
+
+call clifor_finalizer
+
+
 in = json_io_read_input(input_file)
 
 ! getting input parameters
@@ -55,7 +84,8 @@ select case (in%transmitter%direction)
     tmt(:,3) = in%transmitter%initial%z + (/(i,i=0,nT-1)/) * in%transmitter%step
     mydirecT = tmt(:,3)
   case default
-    stop 'Error associated to transmitters! In direction, step, first or final coordinate!'
+    call clifor_write_error('Error associated to transmitters! In direction, step, first or final coordinate!')
+    stop 1
 end select
 
 !constructing array of receivers:
@@ -82,7 +112,8 @@ select case (in%receiver%direction)
     rcv(:,3) = in%receiver%initial%z + (/(i,i=0,nR-1)/) * in%receiver%step
     mydirecR = rcv(:,3)
   case default
-    stop 'Error associated to receivers! In direction, step, first or final coordinate!'
+    call clifor_write_error('Error associated to receivers! In direction, step, first or final coordinate!')
+    stop 1
 end select
 
 !constructing array of frequencies:
@@ -245,8 +276,6 @@ select case (in%transmitter%model)
     end do
   end select
 
-allocate(character(1) :: output_file)
-output_file = cli_get_option_value('-o')
 call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
 
 call cpu_time(t2)
