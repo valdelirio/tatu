@@ -3,6 +3,7 @@
 *.csv
 build/
 data/
+tatu
 
 # Prerequisites
 *.d

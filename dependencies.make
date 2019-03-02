@@ -1,12 +1,12 @@
 dipoles = \
 	Anderson \
 	parameters \
-	filtros \
-	escolhadofiltro \
+	filters \
+	select_filter \
 	hedx \
 	hedy \
 	ved \
 	hmdx \
 	hmdy \
 	vmd \
-	main1D
+	tatu

@@ -42,7 +42,7 @@ dipoles.o = $(patsubst %, $(build)/%.o, $(dipoles))
 
 
 # Target to create executable binary
-main1D.x: $(json_io.o) $(json-fortran.o) $(clifor.o) $(dipoles.o)
+tatu: $(json_io.o) $(json-fortran.o) $(clifor.o) $(dipoles.o)
 # $(@) represents the current target, in this case: $(@) = main1D.x
 # $(^) represents all dependencies of the current target, in this case: all .o files
 # -J specifies where to search for .mod files for compiled modules
@@ -70,4 +70,3 @@ $(build)/%.o: models/%.f08
 
 clean:
 	rm -rf $(build)
-	rm -rf *.x

@@ -1,4 +1,4 @@
-module filtros_J0_J1_J2_sen_cos
+module J0_J1_J2_sin_cos_filters
   use parameters
 ! The filters included in SenCosWer (wm_abs_201,wm_pes_sen201,wm_pes_cos201) subroutine was downloaded at
 ! https://github.com/empymod/empymod/releases/tag/v1.8.1
@@ -5291,4 +5291,4 @@ wm_pes_cos201(196:198)=(/ 0.00193897106710304062589,-0.00056365452715281295915, 
 wm_pes_cos201(199:201)=(/-0.00002364110105322926388, 0.00000282978680927989219,-0.00000017016052966761765/)
 
 end subroutine SenCosWer
-end module filtros_J0_J1_J2_sen_cos
+end module J0_J1_J2_sin_cos_filters

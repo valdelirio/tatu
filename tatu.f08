@@ -1,4 +1,4 @@
-program main1Dmod
+program tatu
 use clifor
 use json_io
 use parameters
@@ -9,23 +9,23 @@ use hedx
 use hedy
 use ved
 implicit none
-integer :: ncam, nT, nR, i, j, k, p
+integer :: ncam, nT, nR, i, j, k, p, unitfile, writestatus
 real(dp) :: t1, t2, pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
 real(dp), dimension(:), allocatable :: sigmas, h, freq, mydirecT, mydirecR
 real(dp), dimension(:,:), allocatable :: tmt, rcv, myout
 complex(dp) :: eta0, zeta, Exp, Eyp, Ezp, Hxp, Hyp, Hzp
 
-character(len=:), allocatable :: input_file, output_file
+character(len=:), allocatable :: input_file, output_file, output_type
 character(len=20), dimension(15) :: labels
 type(json_input) :: in
 
 call cpu_time(t1)
 
 call clifor_set_program_info( &
-  name='main1D.x', &
+  name='tatu', &
   version='0.1.0', &
-  pretty_name='Electromagnetics Dipoles 1D Modeling', &
-  description='Fortran program to 1D Electromagnetic Modeling' &
+  pretty_name='Tatu', &
+  description='Geophysics Electromagnetic Modeling in 1D Layered Media' &
 )
 
 call clifor_create_option('v', 'version', 'Show version and exit')
@@ -34,7 +34,7 @@ call clifor_create_option('i', 'input-file', 'File to read the input data', &
                               required=.true., need_value=.true., value_name='FILEPATH')
 call clifor_create_option('o', 'output-file', 'File to write the output data', &
                               required=.true., need_value=.true., value_name='FILEPATH')
-! call clifor_create_option('f', 'format', 'Output file format: json (default) or ssv')
+call clifor_create_option('t', 'output-type', 'Output file type: json (default) or ssv', need_value=.true., value_name='FILETYPE')
 
 call clifor_read_command_line
 
@@ -49,8 +49,10 @@ input_file = clifor_get_value_from_option('input-file')
 allocate(character(1) :: output_file)
 output_file = clifor_get_value_from_option('output-file')
 
-call clifor_finalizer
+allocate(character(1) :: output_type)
+output_type = clifor_get_value_from_option('output-type')
 
+call clifor_finalizer
 
 in = json_io_read_input(input_file)
 
@@ -58,6 +60,7 @@ in = json_io_read_input(input_file)
 ncam = in%layers%number
 h = in%layers%thickness
 
+allocate(sigmas(ncam))
 sigmas = 1.d0 / in%layers%resistivity
 
 !constructing array of transmitters:
@@ -275,10 +278,21 @@ select case (in%transmitter%model)
       end do
     end do
   end select
-
-call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+10 format( 15(G24.15E3) )
+select case (output_type)
+  case ('json')
+    call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+  case ('ssv')
+    open(newunit = unitfile, file = output_file, status = 'replace' ,action = 'write', iostat = writestatus)
+    if (writestatus /= 0) call clifor_write_error('On save: '//output_file)
+    write(unitfile,10)transpose(myout)
+    close(unitfile)
+  case default
+    call clifor_write_error('Invalid type. Use "json" or "ssv" only')
+    stop
+end select
 
 call cpu_time(t2)
 write(*,*) t2-t1
 
-end program main1Dmod
+end program tatu

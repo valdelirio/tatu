@@ -1,4 +1,4 @@
-module escolha_do_filtro
+module select_filter
   use parameters
   contains
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -105,7 +105,7 @@ module escolha_do_filtro
   end subroutine
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   subroutine constfiltro( tipofiltro, criador, idtfcd_f, np_f, r, kr, w )
-  use filtros_J0_J1_J2_sen_cos
+  use J0_J1_J2_sin_cos_filters
 
   implicit none
   real(dp), intent(in) :: r
@@ -360,7 +360,7 @@ end if
   end subroutine
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 subroutine constfiltro2( uso, tipofiltro, criador, idtfcd_f, np_f, r, kr, w )
-  use filtros_J0_J1_J2_sen_cos
+  use J0_J1_J2_sin_cos_filters
 
   implicit none
   real(dp), intent(in) :: r
@@ -621,4 +621,4 @@ end if
 
   end subroutine constfiltro2
 
-end module escolha_do_filtro
+end module select_filter

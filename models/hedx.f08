@@ -1,6 +1,6 @@
 module hedx
 use parameters
-use escolha_do_filtro
+use select_filter
 contains
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   subroutine hedx_xyz_loops(Tx,Ty,h0,n,esp,condut,neta,zeta,cx,cy,z,Ex_p,Ey_p,Ez_p,Hx_p,Hy_p,Hz_p)
