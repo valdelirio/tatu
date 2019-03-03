@@ -9,7 +9,7 @@ use hedx
 use hedy
 use ved
 implicit none
-integer :: ncam, nT, nR, i, j, k, p, unitfile, writestatus
+integer :: ncam, nT, nR, i, j, k, p
 real(dp) :: t1, t2, pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
 real(dp), dimension(:), allocatable :: sigmas, h, freq, mydirecT, mydirecR
 real(dp), dimension(:,:), allocatable :: tmt, rcv, myout
@@ -278,19 +278,23 @@ select case (in%transmitter%model)
       end do
     end do
   end select
-10 format( 15(G24.15E3) )
-select case (output_type)
-  case ('json')
-    call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
-  case ('ssv')
-    open(newunit = unitfile, file = output_file, status = 'replace' ,action = 'write', iostat = writestatus)
-    if (writestatus /= 0) call clifor_write_error('On save: '//output_file)
-    write(unitfile,10)transpose(myout)
-    close(unitfile)
-  case default
-    call clifor_write_error('Invalid type. Use "json" or "ssv" only')
-    stop
-end select
+
+if ( output_type /= '' ) then
+  select case (output_type)
+    case ('json')
+      call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+    case ('ssv')
+      call json_io_write_output_ssv(output_file, labels, myout)
+    case ('all')
+      call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+      call json_io_write_output_ssv(output_file, labels, myout)
+    case default
+      call clifor_write_error('Invalid type. Use "json" or "ssv" only')
+      stop
+  end select
+else
+  call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+end if
 
 call cpu_time(t2)
 write(*,*) t2-t1
