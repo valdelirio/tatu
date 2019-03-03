@@ -1,4 +1,4 @@
-dipoles = \
+tatu = \
 	Anderson \
 	parameters \
 	filters \

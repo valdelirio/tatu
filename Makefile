@@ -7,7 +7,7 @@ fc = gfortran
 development_flags = -J$(build) -std=f2008 -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -fmax-errors=1 -g -fcheck=all -fbacktrace
 production_flags  = -J$(build) -std=f2008 -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -Werror \
  -fmax-errors=1 -O3 -march=native -ffast-math -funroll-loops -static-libgfortran
-flags = $(production_flags)
+flags = $(development_flags)
 
 # If not exist, create build directory
 $(shell mkdir -p $(build))
@@ -32,18 +32,18 @@ json-fortran.o = $(patsubst %, $(build)/%.o, $(json-fortran))
 json_io.o = $(patsubst %, $(build)/%.o, $(json_io))
 #--------------------------------------------------------------------
 
-# ELECTROMAGNETICS DIPOLES
+# TATU
 #--------------------------------------------------------------------
-# dipoles dependencies from file
+# tatu dependencies from file
 include ./dependencies.make
-# Adds build path and .o extension to each one of dipoles dependencies
-dipoles.o = $(patsubst %, $(build)/%.o, $(dipoles))
+# Adds build path and .o extension to each one of tatu dependencies
+tatu.o = $(patsubst %, $(build)/%.o, $(tatu))
 #--------------------------------------------------------------------
 
 
 # Target to create executable binary
-tatu: $(json_io.o) $(json-fortran.o) $(clifor.o) $(dipoles.o)
-# $(@) represents the current target, in this case: $(@) = main1D.x
+tatu: $(json_io.o) $(json-fortran.o) $(clifor.o) $(tatu.o)
+# $(@) represents the current target, in this case: $(@) = tatu
 # $(^) represents all dependencies of the current target, in this case: all .o files
 # -J specifies where to search for .mod files for compiled modules
 	$(fc) $(flags) -o $(@) $(^)
