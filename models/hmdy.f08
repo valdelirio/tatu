@@ -1,5 +1,6 @@
 module hmdy
 use parameters
+use utils
 use select_filter
     contains
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -15,7 +16,7 @@ subroutine hmdy_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_p, Ey_p, Ez_p, Hx_p, Hy_p, Hz_p
 
-  integer :: i, j, k, camad, camadT, filtro, idtfcd_cJ0, ident_fJ0, nJ0, idtfcd_cJ1, ident_fJ1, nJ1
+  integer :: i, j, camad, camadT, filtro, idtfcd_cJ0, ident_fJ0, nJ0, idtfcd_cJ1, ident_fJ1, nJ1
   real(dp) :: x, y, r
   real(dp), dimension(:), allocatable :: h, krJ0, krJ1, w_J0, w_J1, prof
 
@@ -30,7 +31,7 @@ subroutine hmdy_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   complex(dp), dimension(:), allocatable :: kernelExJ0, kernelExJ1, kernelEyJ0, kernelEyJ1, kernelEzJ1
   complex(dp), dimension(:), allocatable :: kernelHxJ0, kernelHxJ1, kernelHyJ0, kernelHyJ1, kernelHzJ1
 
-  
+
   if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
     x = dsign( 1.d-1, Tx )
   elseif ( dabs(cx - Tx) < eps .and. dabs(Tx) < eps ) then
@@ -47,57 +48,7 @@ subroutine hmdy_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   end if
   r = dsqrt( x ** 2 + y ** 2 )
 
-  allocate( h(0 : n), prof(-1 : n) )
-  if ( size(esp) == n ) then
-    h(0) = 0.d0
-    h(1 : n) = esp
-  else
-    h(0) = 0.d0
-    h(1 : n - 1) = esp
-    h(n) = 1.d300
-  end if
-! criando um novo vetor de profundidades que se adeque à qualquer situação patológica
-  prof(-1) = -1.d300
-  prof(0) = 0.d0
-  if ( n > 1 ) then
-        prof(1) = h(1)
-        if (n > 2) then
-            do k = 2, n - 1
-                prof(k) = prof(k - 1) + h(k)
-            end do
-        end if
-  end if
-  prof(n) = 1.d300
-
-!para descobrir em que camada está a observação
-  camad = 0
-  if (z <= 0.d0) then
-    camad = 0
-  else if (z > prof(n - 1)) then
-    camad = n
-  else
-        do i = n - 1, 1, -1
-            if ( z > prof(i - 1) ) then
-                camad = i
-                exit
-            end if
-        end do
-  end if
-
-!para descobrir em que camada está o transmissor
-  camadT = 0
-  if ( h0 <= 0.d0 ) then
-    camadT = 0
-  else if ( h0 > prof(n - 1) ) then
-    camadT = n
-  else
-        do j = n - 1, 1, -1
-            if ( h0 > prof(j - 1) ) then
-                camadT = j
-                exit
-            end if
-        end do
-  end if
+call sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 
 !!  write(*,*)'Entre com o criador dos filtros J0: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3) ou Key(4)'
 !!  read(*,*)idtfcd_cJ0
@@ -676,7 +627,7 @@ subroutine hmdy_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_ky, Ey_ky, Ez_ky, Hx_ky, Hy_ky, Hz_ky
 
-  integer :: i, j, k, camad, camadT, autor, filtro, npts, nptc, funs, func
+  integer :: i, j, camad, camadT, autor, filtro, npts, nptc, funs, func
   real(dp) :: x
   real(dp), dimension(:), allocatable :: h, kxsen, kxcos, kr2sen, kr2cos, w_sen, w_cos, prof
 
@@ -690,7 +641,7 @@ subroutine hmdy_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   complex(dp), dimension(:,:), allocatable :: TMdwSen, TMdwCos, TEdwSen, TEdwCos, TMupSen, TMupCos, TEupSen, TEupCos
   complex(dp), dimension(:), allocatable :: Ktmdz_Sen, Ktmdz_Cos, Ktm_Sen, Ktm_Cos, Kte_Sen, Kte_Cos, Ktedz_Sen, Ktedz_Cos
   complex(dp), dimension(:), allocatable :: kernelEx, kernelEy, kernelEz, kernelHx, kernelHy, kernelHz
-  
+
 
   if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
     x = dsign( 1.d-1, Tx )
@@ -700,57 +651,7 @@ subroutine hmdy_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
     x = cx - Tx
   end if
 
-  allocate( h(0 : n), prof(-1 : n) )
-  if ( size(esp) == n ) then
-    h(0) = 0.d0
-    h(1 : n) = esp
-  else
-    h(0) = 0.d0
-    h(1 : n - 1) = esp
-    h(n) = 1.d300
-  end if
-! criando um novo vetor de profundidades que se adeque à qualquer situação patológica
-  prof(-1) = -1.d300
-  prof(0) = 0.d0
-  if ( n > 1 ) then
-        prof(1) = h(1)
-        if ( n > 2 ) then
-            do k = 2, n - 1
-                prof(k) = prof(k-1) + h(k)
-            end do
-        end if
-  end if
-  prof(n) = 1.d300
-
-!para descobrir em que camada esta a observacao
-  camad = 0
-  if ( z < 0.d0 ) then
-    camad = 0
-  else if ( z >= prof(n - 1) ) then
-    camad = n
-  else
-        do i = n - 1, 1, -1
-            if ( z >= prof(i - 1) ) then
-                camad = i
-                exit
-            end if
-        end do
-  end if
-
-!para descobrir em que camada está o transmissor
-  camadT = 0
-  if ( h0 < 0.d0 ) then
-    camadT = 0
-  else if ( h0 >= prof(n - 1) ) then
-    camadT = n
-  else
-        do j = n - 1, 1, -1
-            if ( h0 >= prof(j - 1) ) then
-                camadT = j
-                exit
-            end if
-        end do
-  end if
+call sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ! to workaround the warning: ... may be used uninitialized in this function
 allocate( TMupSen(1,1), TMupCos(1,1) )
@@ -1304,5 +1205,5 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
   deallocate( kernelEx, kernelEy, kernelEz, kernelHx, kernelHy, kernelHz )
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 end subroutine hmdy_xkyz_loops
-!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 end module hmdy

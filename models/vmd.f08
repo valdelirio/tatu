@@ -1,5 +1,6 @@
 module vmd
 use parameters
+use utils
 use select_filter
     contains
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -15,7 +16,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_p, Ey_p, Hx_p, Hy_p, Hz_p
 
-  integer :: i, j, k, camad, camadT, filtro, idtfcd_cJ0, ident_fJ0, nJ0, idtfcd_cJ1, ident_fJ1, nJ1
+  integer :: i, j, camad, camadT, filtro, idtfcd_cJ0, ident_fJ0, nJ0, idtfcd_cJ1, ident_fJ1, nJ1
   real(dp) :: x, y, r
   real(dp), dimension(:), allocatable :: h, krJ0, krJ1, w_J0, w_J1, prof
 
@@ -29,7 +30,6 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
   complex(dp), dimension(:), allocatable :: Kte_J0, Kte_J1, Ktedz_J1
   complex(dp), dimension(:), allocatable :: kernelExJ0, kernelExJ1, kernelEyJ0, kernelEyJ1
   complex(dp), dimension(:), allocatable :: kernelHxJ0, kernelHxJ1, kernelHyJ0, kernelHyJ1, kernelHzJ1
-  
 
   if ( dabs(cx - Tx) < eps ) then
     x = dsign( 1.d-1, Tx )
@@ -40,56 +40,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
   y = cy - Ty
   r = dsqrt( x ** 2 + y ** 2 )
 
-  allocate( h(0 : n), prof(-1 : n) )
-  if ( size(esp) == n ) then
-    h(0) = 0.d0
-    h(1 : n) = esp
-  else
-    h(0) = 0.d0
-    h(1 : n - 1) = esp
-    h(n) = 1.d300
-  end if
-! criando um novo vetor de profundidades que se adeque à qualquer situação patológica
-  prof(-1) = -1.d300
-  prof(0) = 0.d0
-  if ( n > 1 ) then
-        prof(1) = h(1)
-        if ( n > 2 ) then
-            do k = 2, n - 1
-                prof(k) = prof(k - 1) + h(k)
-            end do
-        end if
-  end if
-  prof(n) = 1.d300
-camad = 0
-!para descobrir em que camada está a observação
-  if ( z <= 0.d0 ) then
-    camad = 0
-  else if ( z > prof(n - 1) ) then
-    camad = n
-  else
-        do i = n - 1, 1, -1
-            if ( z > prof(i - 1) ) then
-                camad = i
-                exit
-            end if
-        end do
-  end if
-camadT = 0
-!para descobrir em que camada está o transmissor
-  if ( h0 <= 0.d0 ) then
-        camadT = 0
-  else if ( h0 > prof(n - 1) ) then
-    camadT = n
-  else
-        do j = n - 1, 1, -1
-            if ( h0 > prof(j - 1) ) then
-                camadT = j
-                exit
-            end if
-        end do
-  end if
-
+call sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 !!  write(*,*)'Entre com o criador dos filtros J0: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3) ou Key(4)'
 !!  read(*,*)idtfcd_cJ0
   filtro = 0  !esta variável direciona o uso de filtros J0 e J1 em vez de seno e cosseno
@@ -461,7 +412,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
   complex(dp), intent(in) :: zeta, neta
   complex(dp), intent(out) :: Ex_ky, Ey_ky, Hx_ky, Hy_ky, Hz_ky
 
-  integer :: i, j, k, camad, camadT, autor, filtro, npts, nptc, funs, func
+  integer :: i, j, camad, camadT, autor, filtro, npts, nptc, funs, func
   real(dp) :: x
   real(dp), dimension(:), allocatable :: h, kxsen, kxcos, kr2sen, kr2cos, w_sen, w_cos, prof
 
@@ -475,7 +426,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
   complex(dp), dimension(:,:), allocatable :: TEdwSen, TEdwCos, TEupSen, TEupCos
   complex(dp), dimension(:), allocatable :: Kte_Sen, Kte_Cos, Ktedz_Sen, Ktedz_Cos
   complex(dp), dimension(:), allocatable :: kernelEx, kernelEy, kernelHx, kernelHy, kernelHz
-  
+
 
   if ( dabs(cx - Tx) < eps ) then
     x = dsign( 1.d-1, Tx )
@@ -483,55 +434,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
     x = cx - Tx
   end if
 
-  allocate( h(0 : n), prof(-1 : n) )
-  if ( size(esp) == n ) then
-    h(0) = 0.d0
-    h(1 : n) = esp
-  else
-    h(0) = 0.d0
-    h(1 : n - 1) = esp
-    h(n) = 1.d300
-  end if
-! criando um novo vetor de profundidades que se adeque à qualquer situação patológica
-  prof(-1) = -1.d300
-  prof(0) = 0.d0
-  if ( n > 1 ) then
-        prof(1) = h(1)
-        if ( n > 2 ) then
-            do k = 2, n - 1
-                prof(k) = prof(k-1) + h(k)
-            end do
-        end if
-  end if
-  prof(n) = 1.d300
-  camad = 0
-!para descobrir em que camada está a observação
-  if ( z < 0.d0 ) then
-        camad = 0
-  else if ( z >= prof(n - 1) ) then
-    camad = n
-  else
-        do i = n - 1, 1, -1
-            if ( z >= prof(i - 1) ) then
-                camad = i
-                exit
-            end if
-        end do
-  end if
-  camadT = 0
-!para descobrir em que camada está o transmissor
-  if ( h0 < 0.d0 ) then
-        camadT = 0
-  else if ( h0 >= prof(n - 1) ) then
-    camadT = n
-  else
-        do j = n - 1, 1, -1
-            if ( h0 >= prof(j - 1) ) then
-                camadT = j
-                exit
-            end if
-        end do
-  end if
+call sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ! work around the warning: ... may be used uninitialized in this function
 allocate( TEupSen(1,1), TEupCos(1,1) )
@@ -903,5 +806,5 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
   deallocate( kernelEx, kernelEy, kernelHx, kernelHy, kernelHz )
 !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   end subroutine vmd_xkyz_loops
-!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+!-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 end module vmd
