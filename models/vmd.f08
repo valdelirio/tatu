@@ -29,7 +29,7 @@ subroutine vmd_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex_
   complex(dp), dimension(:), allocatable :: Kte_J0, Kte_J1, Ktedz_J1
   complex(dp), dimension(:), allocatable :: kernelExJ0, kernelExJ1, kernelEyJ0, kernelEyJ1
   complex(dp), dimension(:), allocatable :: kernelHxJ0, kernelHxJ1, kernelHyJ0, kernelHyJ1, kernelHzJ1
-  real(dp), parameter :: eps = 1.d-7
+  
 
   if ( dabs(cx - Tx) < eps ) then
     x = dsign( 1.d-1, Tx )
@@ -475,7 +475,7 @@ subroutine vmd_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky,
   complex(dp), dimension(:,:), allocatable :: TEdwSen, TEdwCos, TEupSen, TEupCos
   complex(dp), dimension(:), allocatable :: Kte_Sen, Kte_Cos, Ktedz_Sen, Ktedz_Cos
   complex(dp), dimension(:), allocatable :: kernelEx, kernelEy, kernelHx, kernelHy, kernelHz
-  real(dp), parameter :: eps = 1.d-7
+  
 
   if ( dabs(cx - Tx) < eps ) then
     x = dsign( 1.d-1, Tx )

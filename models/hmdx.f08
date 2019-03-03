@@ -31,7 +31,7 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   complex(dp), dimension(:), allocatable :: kernelHxJ0, kernelHxJ1, kernelHyJ0, kernelHyJ1, kernelHzJ1
 
   integer :: ehsingx, ehsingy
-  real(dp), parameter :: eps = 1.d-7
+  
 
   if ( dabs(cx - Tx) < eps ) then
     ehsingx = 1
@@ -843,7 +843,7 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   complex(dp), dimension(:,:), allocatable :: TMdwSen, TMdwCos, TEdwSen, TEdwCos, TMupSen, TMupCos, TEupSen, TEupCos
   complex(dp), dimension(:), allocatable :: Ktmdz_Sen, Ktmdz_Cos, Ktm_Sen, Ktm_Cos, Kte_Sen, Kte_Cos, Ktedz_Sen, Ktedz_Cos
   complex(dp), dimension(:), allocatable :: kernelEx, kernelEy, kernelEz, kernelHx, kernelHy, kernelHz
-  real(dp), parameter :: eps = 1.d-7
+  
 
   if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
     x = dsign( 1.d-1, Tx )

@@ -24,7 +24,7 @@ contains
   complex(dp),dimension(:),allocatable::Ktmdz_J0,Ktmdz_J1,Ktm_J0,Ktm_J1,Kte_J0,Kte_J1,Ktedz_J0,Ktedz_J1
   complex(dp),dimension(:),allocatable::kernelExJ0,kernelExJ1,kernelEyJ0,kernelEyJ1,kernelEzJ1
   complex(dp),dimension(:),allocatable::kernelHxJ0,kernelHxJ1,kernelHyJ0,kernelHyJ1,kernelHzJ1
-  real(dp), parameter :: eps = 1.d-7
+
   if ( dabs(cx - Tx) < eps ) then
     ehsingx = 1
     x = 1.d-1
@@ -788,7 +788,7 @@ contains
   complex(dp)::kerEx,kerEy,kerEz
   complex(dp)::kerHx,kerHy,kerHz
 
-real(dp), parameter :: eps = 1.d-7
+
 if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
   x = dsign( 1.d0, Tx )
 elseif ( dabs(cx - Tx) < eps .and. dabs(Tx) < eps ) then
@@ -2241,7 +2241,7 @@ contains
   complex(dp),dimension(:,:),allocatable::TMdwSen,TMdwCos,TEdwSen,TEdwCos,TMupSen,TMupCos,TEupSen,TEupCos
   complex(dp),dimension(:),allocatable::Ktmdz_Sen,Ktmdz_Cos,Ktm_Sen,Ktm_Cos,Kte_Sen,Kte_Cos,Ktedz_Sen,Ktedz_Cos
   complex(dp),dimension(:),allocatable::kernelEx,kernelEy,kernelEz,kernelHx,kernelHy,kernelHz
-  real(dp), parameter :: eps = 1.d-7
+
   if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
     x = dsign( 1.d0, Tx )
   elseif ( dabs(cx - Tx) < eps .and. dabs(Tx) < eps ) then
@@ -2826,7 +2826,6 @@ contains
 !   real(dp)::TOL1
 !   integer::NF
 !   complex(dp)::DZHANK
-!   ! real(dp), parameter :: eps = 1.d-7
 !
 ! ! if (dabs(cx-Tx)< eps) then
 ! ! x=Tx/dabs(Tx)

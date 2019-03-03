@@ -23,7 +23,7 @@ contains
   complex(dp),dimension(:),allocatable::Ktmdz_J1,Ktm_J0,Ktm_J1
   complex(dp),dimension(:),allocatable::kernelExJ1,kernelEyJ1,kernelEzJ0
   complex(dp),dimension(:),allocatable::kernelHxJ1,kernelHyJ1
-  real(dp), parameter :: eps = 1.d-7
+  
   Hz_p = (0.d0,0.d0)
 
   if ( dabs(cx-Tx) < eps ) then
@@ -453,7 +453,7 @@ allocate( TMdwJ0(1,1), TMdwJ1(1,1), TMupJ0(1,1), TMupJ1(1,1) )
   complex(dp),dimension(:,:),allocatable::TMdwSen,TMdwCos,TMupSen,TMupCos
   complex(dp),dimension(:),allocatable::Ktmdz_Sen,Ktmdz_Cos,Ktm_Sen,Ktm_Cos,Kte_Sen,Kte_Cos,Ktedz_Sen,Ktedz_Cos
   complex(dp),dimension(:),allocatable::kernelEx,kernelEy,kernelEz,kernelHx,kernelHy
-  real(dp), parameter :: eps = 1.d-7
+  
   Hz_ky = (0.d0,0.d0)
   if ( dabs(cx-Tx) < eps ) then
     x=1.d-1
@@ -880,7 +880,7 @@ integer::i,j,k,camad,camadT,autor,filtro,npts,nptc,funs,func
 real(dp)::x,kx
 real(dp),dimension(:),allocatable::h,kxsen,kxcos,w_sen,w_cos,prof
 
-real(dp), parameter :: eps = 1.d-7
+
 
 complex(dp) :: kerEx, kerEy, kerEz, kerHx, kerHy
 Hz_ky = (0.d0,0.d0)
@@ -1888,7 +1888,6 @@ end subroutine ved_xkyz
 !   real(dp)::TOL1
 !   integer::NF
 !   complex(dp)::DZHANK
-!   real(dp), parameter :: eps = 1.d-7
 !   Hz_p = (0.d0,0.d0)
 !
 !   if ( dabs(cx-Tx) < eps ) then
