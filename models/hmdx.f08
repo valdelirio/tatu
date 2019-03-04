@@ -85,99 +85,90 @@ subroutine hmdx_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
   allocate( ImpIntJ0(nJ0,0 : n), ImpIntJ1(nJ1,0 : n) )
   allocate( uhJ0(nJ0,0 : n), uhJ1(nJ1,0 : n), tghJ0(nJ0,0 : n), tghJ1(nJ1,0 : n) )
 !
-  do i = 0, n
-        if ( i == 0 ) then
-            wvnb2(i) = -zeta * neta
-            uJ0(:,i) = sqrt( krJ0 * krJ0 - wvnb2(i) )
-            uJ1(:,i) = sqrt( krJ1 * krJ1 - wvnb2(i) )
-            AdmIntJ0(:,i) = uJ0(:,i) / zeta
-            AdmIntJ1(:,i) = uJ1(:,i) / zeta
-            ImpIntJ0(:,i) = uJ0(:,i) / neta
-            ImpIntJ1(:,i) = uJ1(:,i) / neta
-            uhJ0(:,i) = uJ0(:,i) * h(i)
-            uhJ1(:,i) = uJ1(:,i) * h(i)
-            tghJ0(:,i) = ( 1.d0 - exp( -2.d0 * uhJ0(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhJ0(:,i) ) )
-            tghJ1(:,i) = ( 1.d0 - exp( -2.d0 * uhJ1(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhJ1(:,i) ) )
-    else
-            wvnb2(i) = -zeta * condut(i)
-            uJ0(:,i) = sqrt( krJ0 * krJ0 - wvnb2(i) )
-            uJ1(:,i) = sqrt( krJ1 * krJ1 - wvnb2(i) )
-            AdmIntJ0(:,i) = uJ0(:,i) / zeta
-            AdmIntJ1(:,i) = uJ1(:,i) / zeta
-            ImpIntJ0(:,i) = uJ0(:,i) / condut(i)
-            ImpIntJ1(:,i) = uJ1(:,i) / condut(i)
-            uhJ0(:,i) = uJ0(:,i) * h(i)
-            uhJ1(:,i) = uJ1(:,i) * h(i)
-            tghJ0(:,i) = ( 1.d0 - exp( -2.d0 * uhJ0(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhJ0(:,i) ) )
-            tghJ1(:,i) = ( 1.d0 - exp( -2.d0 * uhJ1(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhJ1(:,i) ) )
-    end if
+  wvnb2(0) = -zeta * neta
+  uJ0(:,0) = sqrt( krJ0 * krJ0 - wvnb2(0) )
+  uJ1(:,0) = sqrt( krJ1 * krJ1 - wvnb2(0) )
+  AdmIntJ0(:,0) = uJ0(:,0) / zeta
+  AdmIntJ1(:,0) = uJ1(:,0) / zeta
+  ImpIntJ0(:,0) = uJ0(:,0) / neta
+  ImpIntJ1(:,0) = uJ1(:,0) / neta
+  uhJ0(:,0) = uJ0(:,0) * h(0)
+  uhJ1(:,0) = uJ1(:,0) * h(0)
+  tghJ0(:,0) = ( 1.d0 - exp( -2.d0 * uhJ0(:,0) ) ) / ( 1.d0 + exp( -2.d0 * uhJ0(:,0) ) )
+  tghJ1(:,0) = ( 1.d0 - exp( -2.d0 * uhJ1(:,0) ) ) / ( 1.d0 + exp( -2.d0 * uhJ1(:,0) ) )
+  do i = 1, n
+    wvnb2(i) = -zeta * condut(i)
+    uJ0(:,i) = sqrt( krJ0 * krJ0 - wvnb2(i) )
+    uJ1(:,i) = sqrt( krJ1 * krJ1 - wvnb2(i) )
+    AdmIntJ0(:,i) = uJ0(:,i) / zeta
+    AdmIntJ1(:,i) = uJ1(:,i) / zeta
+    ImpIntJ0(:,i) = uJ0(:,i) / condut(i)
+    ImpIntJ1(:,i) = uJ1(:,i) / condut(i)
+    uhJ0(:,i) = uJ0(:,i) * h(i)
+    uhJ1(:,i) = uJ1(:,i) * h(i)
+    tghJ0(:,i) = ( 1.d0 - exp( -2.d0 * uhJ0(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhJ0(:,i) ) )
+    tghJ1(:,i) = ( 1.d0 - exp( -2.d0 * uhJ1(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhJ1(:,i) ) )
   end do
 
   allocate( AdmApdwJ0(nJ0,1 : n), AdmApdwJ1(nJ1,1 : n), ImpApdwJ0(nJ0,1 : n), ImpApdwJ1(nJ1,1 : n) )
   allocate( RTEdwJ0(nJ0,0:n), RTEdwJ1(nJ1,0 : n), RTMdwJ0(nJ0,0 : n), RTMdwJ1(nJ1,0 : n) )
 
-  do i = n, 1, -1
-    if ( i == n ) then
-            AdmApdwJ0(:,i) = AdmIntJ0(:,i)
-            AdmApdwJ1(:,i) = AdmIntJ1(:,i)
-            ImpApdwJ0(:,i) = ImpIntJ0(:,i)
-            ImpApdwJ1(:,i) = ImpIntJ1(:,i)
-            RTEdwJ0(:,i) = (0.d0,0.d0)
-            RTEdwJ1(:,i) = (0.d0,0.d0)
-            RTMdwJ0(:,i) = (0.d0,0.d0)
-            RTMdwJ1(:,i) = (0.d0,0.d0)
-    else
-            AdmApdwJ0(:,i) = AdmIntJ0(:,i) * ( AdmApdwJ0(:,i + 1) + AdmIntJ0(:,i) * &
-                            tghJ0(:,i) ) / ( AdmIntJ0(:,i) + AdmApdwJ0(:,i + 1) * tghJ0(:,i) )
-            AdmApdwJ1(:,i) = AdmIntJ1(:,i) * ( AdmApdwJ1(:,i + 1) + AdmIntJ1(:,i) * &
-                            tghJ1(:,i) ) / ( AdmIntJ1(:,i) + AdmApdwJ1(:,i + 1) * tghJ1(:,i) )
-            ImpApdwJ0(:,i) = ImpIntJ0(:,i) * ( ImpApdwJ0(:,i + 1) + ImpIntJ0(:,i) * &
-                            tghJ0(:,i) ) / ( ImpIntJ0(:,i) + ImpApdwJ0(:,i + 1) * tghJ0(:,i) )
-            ImpApdwJ1(:,i) = ImpIntJ1(:,i) * ( ImpApdwJ1(:,i + 1) + ImpIntJ1(:,i) * &
-                            tghJ1(:,i) ) / ( ImpIntJ1(:,i) + ImpApdwJ1(:,i + 1) * tghJ1(:,i) )
-            RTEdwJ0(:,i) = ( AdmIntJ0(:,i) - AdmApdwJ0(:,i + 1) ) / ( AdmIntJ0(:,i) + AdmApdwJ0(:,i + 1) )
-            RTEdwJ1(:,i) = ( AdmIntJ1(:,i) - AdmApdwJ1(:,i + 1) ) / ( AdmIntJ1(:,i) + AdmApdwJ1(:,i + 1) )
-            RTMdwJ0(:,i) = ( ImpIntJ0(:,i) - ImpApdwJ0(:,i + 1) ) / ( ImpIntJ0(:,i) + ImpApdwJ0(:,i + 1) )
-            RTMdwJ1(:,i) = ( ImpIntJ1(:,i) - ImpApdwJ1(:,i + 1) ) / ( ImpIntJ1(:,i) + ImpApdwJ1(:,i + 1) )
-    end if
+  AdmApdwJ0(:,n) = AdmIntJ0(:,n)
+  AdmApdwJ1(:,n) = AdmIntJ1(:,n)
+  ImpApdwJ0(:,n) = ImpIntJ0(:,n)
+  ImpApdwJ1(:,n) = ImpIntJ1(:,n)
+  RTEdwJ0(:,n) = (0.d0,0.d0)
+  RTEdwJ1(:,n) = (0.d0,0.d0)
+  RTMdwJ0(:,n) = (0.d0,0.d0)
+  RTMdwJ1(:,n) = (0.d0,0.d0)
+  do i = n-1, 1, -1
+    AdmApdwJ0(:,i) = AdmIntJ0(:,i) * ( AdmApdwJ0(:,i + 1) + AdmIntJ0(:,i) * &
+                    tghJ0(:,i) ) / ( AdmIntJ0(:,i) + AdmApdwJ0(:,i + 1) * tghJ0(:,i) )
+    AdmApdwJ1(:,i) = AdmIntJ1(:,i) * ( AdmApdwJ1(:,i + 1) + AdmIntJ1(:,i) * &
+                    tghJ1(:,i) ) / ( AdmIntJ1(:,i) + AdmApdwJ1(:,i + 1) * tghJ1(:,i) )
+    ImpApdwJ0(:,i) = ImpIntJ0(:,i) * ( ImpApdwJ0(:,i + 1) + ImpIntJ0(:,i) * &
+                    tghJ0(:,i) ) / ( ImpIntJ0(:,i) + ImpApdwJ0(:,i + 1) * tghJ0(:,i) )
+    ImpApdwJ1(:,i) = ImpIntJ1(:,i) * ( ImpApdwJ1(:,i + 1) + ImpIntJ1(:,i) * &
+                    tghJ1(:,i) ) / ( ImpIntJ1(:,i) + ImpApdwJ1(:,i + 1) * tghJ1(:,i) )
+    RTEdwJ0(:,i) = ( AdmIntJ0(:,i) - AdmApdwJ0(:,i + 1) ) / ( AdmIntJ0(:,i) + AdmApdwJ0(:,i + 1) )
+    RTEdwJ1(:,i) = ( AdmIntJ1(:,i) - AdmApdwJ1(:,i + 1) ) / ( AdmIntJ1(:,i) + AdmApdwJ1(:,i + 1) )
+    RTMdwJ0(:,i) = ( ImpIntJ0(:,i) - ImpApdwJ0(:,i + 1) ) / ( ImpIntJ0(:,i) + ImpApdwJ0(:,i + 1) )
+    RTMdwJ1(:,i) = ( ImpIntJ1(:,i) - ImpApdwJ1(:,i + 1) ) / ( ImpIntJ1(:,i) + ImpApdwJ1(:,i + 1) )
   end do
-    RTEdwJ0(:,0) = ( AdmIntJ0(:,0) - AdmApdwJ0(:,1) ) / ( AdmIntJ0(:,0) + AdmApdwJ0(:,1) )
-    RTEdwJ1(:,0) = ( AdmIntJ1(:,0) - AdmApdwJ1(:,1) ) / ( AdmIntJ1(:,0) + AdmApdwJ1(:,1) )
-    RTMdwJ0(:,0) = ( ImpIntJ0(:,0) - ImpApdwJ0(:,1) ) / ( ImpIntJ0(:,0) + ImpApdwJ0(:,1) )
-    RTMdwJ1(:,0) = ( ImpIntJ1(:,0) - ImpApdwJ1(:,1) ) / ( ImpIntJ1(:,0) + ImpApdwJ1(:,1) )
+  RTEdwJ0(:,0) = ( AdmIntJ0(:,0) - AdmApdwJ0(:,1) ) / ( AdmIntJ0(:,0) + AdmApdwJ0(:,1) )
+  RTEdwJ1(:,0) = ( AdmIntJ1(:,0) - AdmApdwJ1(:,1) ) / ( AdmIntJ1(:,0) + AdmApdwJ1(:,1) )
+  RTMdwJ0(:,0) = ( ImpIntJ0(:,0) - ImpApdwJ0(:,1) ) / ( ImpIntJ0(:,0) + ImpApdwJ0(:,1) )
+  RTMdwJ1(:,0) = ( ImpIntJ1(:,0) - ImpApdwJ1(:,1) ) / ( ImpIntJ1(:,0) + ImpApdwJ1(:,1) )
 
   allocate( AdmApupJ0(nJ0,0 : n - 1), AdmApupJ1(nJ1,0 : n - 1), ImpApupJ0(nJ0,0 : n - 1), ImpApupJ1(nJ1,0 : n - 1) )
   allocate( RTEupJ0(nJ0,0 : n), RTEupJ1(nJ1,0 : n), RTMupJ0(nJ0,0 : n), RTMupJ1(nJ1,0 : n) )
 
-  do i = 0, n - 1
-    if ( i == 0 ) then
-            AdmApupJ0(:,i) = AdmIntJ0(:,i)
-            AdmApupJ1(:,i) = AdmIntJ1(:,i)
-            ImpApupJ0(:,i) = ImpIntJ0(:,i)
-            ImpApupJ1(:,i) = ImpIntJ1(:,i)
-            RTEupJ0(:,i) = (0.d0,0.d0)
-            RTEupJ1(:,i) = (0.d0,0.d0)
-            RTMupJ0(:,i) = (0.d0,0.d0)
-            RTMupJ1(:,i) = (0.d0,0.d0)
-    else
-            AdmApupJ0(:,i) = AdmIntJ0(:,i) * ( AdmApupJ0(:,i - 1) + AdmIntJ0(:,i) * &
-                            tghJ0(:,i) ) / ( AdmIntJ0(:,i) + AdmApupJ0(:,i - 1) * tghJ0(:,i) )
-            AdmApupJ1(:,i) = AdmIntJ1(:,i) * ( AdmApupJ1(:,i - 1) + AdmIntJ1(:,i) * &
-                            tghJ1(:,i) ) / ( AdmIntJ1(:,i) + AdmApupJ1(:,i - 1) * tghJ1(:,i) )
-            ImpApupJ0(:,i) = ImpIntJ0(:,i) * ( ImpApupJ0(:,i - 1) + ImpIntJ0(:,i) * &
-                            tghJ0(:,i) ) / ( ImpIntJ0(:,i) + ImpApupJ0(:,i - 1) * tghJ0(:,i) )
-            ImpApupJ1(:,i) = ImpIntJ1(:,i) * ( ImpApupJ1(:,i - 1) + ImpIntJ1(:,i) * &
-                            tghJ1(:,i) ) / ( ImpIntJ1(:,i) + ImpApupJ1(:,i - 1) * tghJ1(:,i) )
-            RTEupJ0(:,i) = ( AdmIntJ0(:,i) - AdmApupJ0(:,i - 1) ) / ( AdmIntJ0(:,i) + AdmApupJ0(:,i - 1) )
-            RTEupJ1(:,i) = ( AdmIntJ1(:,i) - AdmApupJ1(:,i - 1) ) / ( AdmIntJ1(:,i) + AdmApupJ1(:,i - 1) )
-            RTMupJ0(:,i) = ( ImpIntJ0(:,i) - ImpApupJ0(:,i - 1) ) / ( ImpIntJ0(:,i) + ImpApupJ0(:,i - 1) )
-            RTMupJ1(:,i) = ( ImpIntJ1(:,i) - ImpApupJ1(:,i - 1) ) / ( ImpIntJ1(:,i) + ImpApupJ1(:,i - 1) )
-    end if
+  AdmApupJ0(:,0) = AdmIntJ0(:,0)
+  AdmApupJ1(:,0) = AdmIntJ1(:,0)
+  ImpApupJ0(:,0) = ImpIntJ0(:,0)
+  ImpApupJ1(:,0) = ImpIntJ1(:,0)
+  RTEupJ0(:,0) = (0.d0,0.d0)
+  RTEupJ1(:,0) = (0.d0,0.d0)
+  RTMupJ0(:,0) = (0.d0,0.d0)
+  RTMupJ1(:,0) = (0.d0,0.d0)
+  do i = 1, n - 1
+    AdmApupJ0(:,i) = AdmIntJ0(:,i) * ( AdmApupJ0(:,i - 1) + AdmIntJ0(:,i) * &
+                    tghJ0(:,i) ) / ( AdmIntJ0(:,i) + AdmApupJ0(:,i - 1) * tghJ0(:,i) )
+    AdmApupJ1(:,i) = AdmIntJ1(:,i) * ( AdmApupJ1(:,i - 1) + AdmIntJ1(:,i) * &
+                    tghJ1(:,i) ) / ( AdmIntJ1(:,i) + AdmApupJ1(:,i - 1) * tghJ1(:,i) )
+    ImpApupJ0(:,i) = ImpIntJ0(:,i) * ( ImpApupJ0(:,i - 1) + ImpIntJ0(:,i) * &
+                    tghJ0(:,i) ) / ( ImpIntJ0(:,i) + ImpApupJ0(:,i - 1) * tghJ0(:,i) )
+    ImpApupJ1(:,i) = ImpIntJ1(:,i) * ( ImpApupJ1(:,i - 1) + ImpIntJ1(:,i) * &
+                    tghJ1(:,i) ) / ( ImpIntJ1(:,i) + ImpApupJ1(:,i - 1) * tghJ1(:,i) )
+    RTEupJ0(:,i) = ( AdmIntJ0(:,i) - AdmApupJ0(:,i - 1) ) / ( AdmIntJ0(:,i) + AdmApupJ0(:,i - 1) )
+    RTEupJ1(:,i) = ( AdmIntJ1(:,i) - AdmApupJ1(:,i - 1) ) / ( AdmIntJ1(:,i) + AdmApupJ1(:,i - 1) )
+    RTMupJ0(:,i) = ( ImpIntJ0(:,i) - ImpApupJ0(:,i - 1) ) / ( ImpIntJ0(:,i) + ImpApupJ0(:,i - 1) )
+    RTMupJ1(:,i) = ( ImpIntJ1(:,i) - ImpApupJ1(:,i - 1) ) / ( ImpIntJ1(:,i) + ImpApupJ1(:,i - 1) )
   end do
-    RTEupJ0(:,n) = ( AdmIntJ0(:,n) - AdmApupJ0(:,n - 1) ) / ( AdmIntJ0(:,n) + AdmApupJ0(:,n - 1) )
-    RTEupJ1(:,n) = ( AdmIntJ1(:,n) - AdmApupJ1(:,n - 1) ) / ( AdmIntJ1(:,n) + AdmApupJ1(:,n - 1) )
-    RTMupJ0(:,n) = ( ImpIntJ0(:,n) - ImpApupJ0(:,n - 1) ) / ( ImpIntJ0(:,n) + ImpApupJ0(:,n - 1) )
-    RTMupJ1(:,n) = ( ImpIntJ1(:,n) - ImpApupJ1(:,n - 1) ) / ( ImpIntJ1(:,n) + ImpApupJ1(:,n - 1) )
+  RTEupJ0(:,n) = ( AdmIntJ0(:,n) - AdmApupJ0(:,n - 1) ) / ( AdmIntJ0(:,n) + AdmApupJ0(:,n - 1) )
+  RTEupJ1(:,n) = ( AdmIntJ1(:,n) - AdmApupJ1(:,n - 1) ) / ( AdmIntJ1(:,n) + AdmApupJ1(:,n - 1) )
+  RTMupJ0(:,n) = ( ImpIntJ0(:,n) - ImpApupJ0(:,n - 1) ) / ( ImpIntJ0(:,n) + ImpApupJ0(:,n - 1) )
+  RTMupJ1(:,n) = ( ImpIntJ1(:,n) - ImpApupJ1(:,n - 1) ) / ( ImpIntJ1(:,n) + ImpApupJ1(:,n - 1) )
 
   allocate( AMdwJ0(nJ0), AMdwJ1(nJ1), AMupJ0(nJ0), AMupJ1(nJ1), FEdwJ0(nJ0), FEdwJ1(nJ1), FEupJ0(nJ0), FEupJ1(nJ1) )
 
@@ -794,7 +785,6 @@ subroutine hmdx_xkyz_loops( Tx, ky, h0, n, esp, condut, neta, zeta, cx, z, Ex_ky
   complex(dp), dimension(:), allocatable :: Ktmdz_Sen, Ktmdz_Cos, Ktm_Sen, Ktm_Cos, Kte_Sen, Kte_Cos, Ktedz_Sen, Ktedz_Cos
   complex(dp), dimension(:), allocatable :: kernelEx, kernelEy, kernelEz, kernelHx, kernelHy, kernelHz
 
-
   if ( dabs(cx - Tx) < eps .and. dabs(Tx) > eps ) then
     x = dsign( 1.d-1, Tx )
   elseif ( dabs(cx - Tx) < eps .and. dabs(Tx) < eps ) then
@@ -830,138 +820,122 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
 
   kr2sen = kxsen * kxsen + ky * ky
   kr2cos = kxcos * kxcos + ky * ky
-  do i = 0, n
-    if ( i == 0 ) then
-            wvnb2(i) = -zeta * neta
-            uSen(:,i) = sqrt( kr2sen - wvnb2(i) )
-            uCos(:,i) = sqrt( kr2cos - wvnb2(i) )
-            AdmIntSen(:,i) = uSen(:,i) / zeta
-            AdmIntCos(:,i) = uCos(:,i) / zeta
-            ImpIntSen(:,i) = uSen(:,i) / neta
-            ImpIntCos(:,i) = uCos(:,i) / neta
-            uhSen(:,i) = uSen(:,i) * h(i)
-            uhCos(:,i) = uCos(:,i) * h(i)
-            tghSen(:,i) = ( 1.d0 - exp( -2.d0 * uhSen(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhSen(:,i) ) )
-            tghCos(:,i) = ( 1.d0 - exp( -2.d0 * uhCos(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhCos(:,i) ) )
-    else
-            wvnb2(i) = -zeta * condut(i)
-            uSen(:,i) = sqrt( kr2Sen - wvnb2(i) )
-            uCos(:,i) = sqrt( kr2Cos - wvnb2(i) )
-            AdmIntSen(:,i) = uSen(:,i) / zeta
-            AdmIntCos(:,i) = uCos(:,i) / zeta
-            ImpIntSen(:,i) = uSen(:,i) / condut(i)
-            ImpIntCos(:,i) = uCos(:,i) / condut(i)
-            uhSen(:,i) = uSen(:,i) * h(i)
-            uhCos(:,i) = uCos(:,i) * h(i)
-            tghSen(:,i) = ( 1.d0 - exp( -2.d0 * uhSen(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhSen(:,i) ) )
-            tghCos(:,i) = ( 1.d0 - exp( -2.d0 * uhCos(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhCos(:,i) ) )
-    end if
+
+  wvnb2(0) = -zeta * neta
+  uSen(:,0) = sqrt( kr2sen - wvnb2(0) )
+  uCos(:,0) = sqrt( kr2cos - wvnb2(0) )
+  AdmIntSen(:,0) = uSen(:,0) / zeta
+  AdmIntCos(:,0) = uCos(:,0) / zeta
+  ImpIntSen(:,0) = uSen(:,0) / neta
+  ImpIntCos(:,0) = uCos(:,0) / neta
+  uhSen(:,0) = uSen(:,0) * h(0)
+  uhCos(:,0) = uCos(:,0) * h(0)
+  tghSen(:,0) = ( 1.d0 - exp( -2.d0 * uhSen(:,0) ) ) / ( 1.d0 + exp( -2.d0 * uhSen(:,0) ) )
+  tghCos(:,0) = ( 1.d0 - exp( -2.d0 * uhCos(:,0) ) ) / ( 1.d0 + exp( -2.d0 * uhCos(:,0) ) )
+  do i = 1, n
+    wvnb2(i) = -zeta * condut(i)
+    uSen(:,i) = sqrt( kr2Sen - wvnb2(i) )
+    uCos(:,i) = sqrt( kr2Cos - wvnb2(i) )
+    AdmIntSen(:,i) = uSen(:,i) / zeta
+    AdmIntCos(:,i) = uCos(:,i) / zeta
+    ImpIntSen(:,i) = uSen(:,i) / condut(i)
+    ImpIntCos(:,i) = uCos(:,i) / condut(i)
+    uhSen(:,i) = uSen(:,i) * h(i)
+    uhCos(:,i) = uCos(:,i) * h(i)
+    tghSen(:,i) = ( 1.d0 - exp( -2.d0 * uhSen(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhSen(:,i) ) )
+    tghCos(:,i) = ( 1.d0 - exp( -2.d0 * uhCos(:,i) ) ) / ( 1.d0 + exp( -2.d0 * uhCos(:,i) ) )
   end do
 
   allocate( AdmApdwSen(npts,1 : n), AdmApdwCos(nptc,1 : n), ImpApdwSen(npts,1 : n), ImpApdwCos(nptc,1 : n) )
   allocate( RTEdwSen(npts,0 : n), RTEdwCos(nptc,0 : n), RTMdwSen(npts,0 : n), RTMdwCos(nptc,0 : n) )
 
-  do i = n, 1, -1
-    if ( i == n ) then
-
-            AdmApdwSen(:,i) = AdmIntSen(:,i)
-            AdmApdwCos(:,i) = AdmIntCos(:,i)
-            ImpApdwSen(:,i) = ImpIntSen(:,i)
-            ImpApdwCos(:,i) = ImpIntCos(:,i)
-            RTEdwSen(:,i) = (0.d0,0.d0)
-            RTEdwCos(:,i) = (0.d0,0.d0)
-            RTMdwSen(:,i) = (0.d0,0.d0)
-            RTMdwCos(:,i) = (0.d0,0.d0)
-
-    else
-
-            AdmApdwSen(:,i) = AdmIntSen(:,i) * ( AdmApdwSen(:,i + 1) + AdmIntSen(:,i) * &
-                                tghSen(:,i) ) / ( AdmIntSen(:,i) + AdmApdwSen(:,i + 1) * tghSen(:,i) )
-            AdmApdwCos(:,i) = AdmIntCos(:,i) * ( AdmApdwCos(:,i + 1) + AdmIntCos(:,i) * &
-                                tghCos(:,i) ) / ( AdmIntCos(:,i) + AdmApdwCos(:,i + 1) * tghCos(:,i) )
-            ImpApdwSen(:,i) = ImpIntSen(:,i) * ( ImpApdwSen(:,i + 1) + ImpIntSen(:,i) * &
-                                tghSen(:,i) ) / ( ImpIntSen(:,i) + ImpApdwSen(:,i + 1) * tghSen(:,i) )
-            ImpApdwCos(:,i) = ImpIntCos(:,i) * ( ImpApdwCos(:,i + 1) + ImpIntCos(:,i) * &
-                                tghCos(:,i) ) / ( ImpIntCos(:,i) + ImpApdwCos(:,i + 1) * tghCos(:,i) )
-            RTEdwSen(:,i)=(AdmIntSen(:,i)-AdmApdwSen(:,i+1))/(AdmIntSen(:,i)+AdmApdwSen(:,i+1))
-            RTEdwCos(:,i)=(AdmIntCos(:,i)-AdmApdwCos(:,i+1))/(AdmIntCos(:,i)+AdmApdwCos(:,i+1))
-            RTMdwSen(:,i)=(ImpIntSen(:,i)-ImpApdwSen(:,i+1))/(ImpIntSen(:,i)+ImpApdwSen(:,i+1))
-            RTMdwCos(:,i)=(ImpIntCos(:,i)-ImpApdwCos(:,i+1))/(ImpIntCos(:,i)+ImpApdwCos(:,i+1))
-
-    end if
+  AdmApdwSen(:,n) = AdmIntSen(:,n)
+  AdmApdwCos(:,n) = AdmIntCos(:,n)
+  ImpApdwSen(:,n) = ImpIntSen(:,n)
+  ImpApdwCos(:,n) = ImpIntCos(:,n)
+  RTEdwSen(:,n) = (0.d0,0.d0)
+  RTEdwCos(:,n) = (0.d0,0.d0)
+  RTMdwSen(:,n) = (0.d0,0.d0)
+  RTMdwCos(:,n) = (0.d0,0.d0)
+  do i = n-1, 1, -1
+    AdmApdwSen(:,i) = AdmIntSen(:,i) * ( AdmApdwSen(:,i + 1) + AdmIntSen(:,i) * &
+                      tghSen(:,i) ) / ( AdmIntSen(:,i) + AdmApdwSen(:,i + 1) * tghSen(:,i) )
+    AdmApdwCos(:,i) = AdmIntCos(:,i) * ( AdmApdwCos(:,i + 1) + AdmIntCos(:,i) * &
+                      tghCos(:,i) ) / ( AdmIntCos(:,i) + AdmApdwCos(:,i + 1) * tghCos(:,i) )
+    ImpApdwSen(:,i) = ImpIntSen(:,i) * ( ImpApdwSen(:,i + 1) + ImpIntSen(:,i) * &
+                      tghSen(:,i) ) / ( ImpIntSen(:,i) + ImpApdwSen(:,i + 1) * tghSen(:,i) )
+    ImpApdwCos(:,i) = ImpIntCos(:,i) * ( ImpApdwCos(:,i + 1) + ImpIntCos(:,i) * &
+                      tghCos(:,i) ) / ( ImpIntCos(:,i) + ImpApdwCos(:,i + 1) * tghCos(:,i) )
+    RTEdwSen(:,i)=(AdmIntSen(:,i)-AdmApdwSen(:,i+1))/(AdmIntSen(:,i)+AdmApdwSen(:,i+1))
+    RTEdwCos(:,i)=(AdmIntCos(:,i)-AdmApdwCos(:,i+1))/(AdmIntCos(:,i)+AdmApdwCos(:,i+1))
+    RTMdwSen(:,i)=(ImpIntSen(:,i)-ImpApdwSen(:,i+1))/(ImpIntSen(:,i)+ImpApdwSen(:,i+1))
+    RTMdwCos(:,i)=(ImpIntCos(:,i)-ImpApdwCos(:,i+1))/(ImpIntCos(:,i)+ImpApdwCos(:,i+1))
   end do
-    RTEdwSen(:,0) = ( AdmIntSen(:,0) - AdmApdwSen(:,1) ) / ( AdmIntSen(:,0) + AdmApdwSen(:,1) )
-    RTEdwCos(:,0) = ( AdmIntCos(:,0) - AdmApdwCos(:,1) ) / ( AdmIntCos(:,0) + AdmApdwCos(:,1) )
-    RTMdwSen(:,0) = ( ImpIntSen(:,0) - ImpApdwSen(:,1) ) / ( ImpIntSen(:,0) + ImpApdwSen(:,1) )
-    RTMdwCos(:,0) = ( ImpIntCos(:,0) - ImpApdwCos(:,1) ) / ( ImpIntCos(:,0) + ImpApdwCos(:,1) )
+  RTEdwSen(:,0) = ( AdmIntSen(:,0) - AdmApdwSen(:,1) ) / ( AdmIntSen(:,0) + AdmApdwSen(:,1) )
+  RTEdwCos(:,0) = ( AdmIntCos(:,0) - AdmApdwCos(:,1) ) / ( AdmIntCos(:,0) + AdmApdwCos(:,1) )
+  RTMdwSen(:,0) = ( ImpIntSen(:,0) - ImpApdwSen(:,1) ) / ( ImpIntSen(:,0) + ImpApdwSen(:,1) )
+  RTMdwCos(:,0) = ( ImpIntCos(:,0) - ImpApdwCos(:,1) ) / ( ImpIntCos(:,0) + ImpApdwCos(:,1) )
 
   allocate( AdmApupSen(npts,0 : n - 1), AdmApupCos(nptc,0 : n - 1), ImpApupSen(npts,0 : n - 1), ImpApupCos(nptc,0 : n - 1) )
   allocate( RTEupSen(npts,0 : n), RTEupCos(nptc,0 : n), RTMupSen(npts,0 : n), RTMupCos(nptc,0 : n) )
 
-  do i = 0, n - 1
-    if ( i == 0 ) then
-
-            AdmApupSen(:,i) = AdmIntSen(:,i)
-            AdmApupCos(:,i) = AdmIntCos(:,i)
-            ImpApupSen(:,i) = ImpIntSen(:,i)
-            ImpApupCos(:,i) = ImpIntCos(:,i)
-            RTEupSen(:,i) = (0.d0,0.d0)
-            RTEupCos(:,i) = (0.d0,0.d0)
-            RTMupSen(:,i) = (0.d0,0.d0)
-            RTMupCos(:,i) = (0.d0,0.d0)
-
-    else
-
-            AdmApupSen(:,i) = AdmIntSen(:,i) * ( AdmApupSen(:,i - 1) + AdmIntSen(:,i) * &
-                                tghSen(:,i) ) / ( AdmIntSen(:,i) + AdmApupSen(:,i - 1) * tghSen(:,i) )
-            AdmApupCos(:,i) = AdmIntCos(:,i) * ( AdmApupCos(:,i - 1) + AdmIntCos(:,i) * &
-                                tghCos(:,i) ) / ( AdmIntCos(:,i) + AdmApupCos(:,i - 1) * tghCos(:,i) )
-            ImpApupSen(:,i) = ImpIntSen(:,i) * ( ImpApupSen(:,i - 1) + ImpIntSen(:,i) * &
-                                tghSen(:,i) ) / ( ImpIntSen(:,i) + ImpApupSen(:,i - 1) * tghSen(:,i) )
-            ImpApupCos(:,i) = ImpIntCos(:,i) * ( ImpApupCos(:,i - 1) + ImpIntCos(:,i) * &
-                                tghCos(:,i) ) / ( ImpIntCos(:,i) + ImpApupCos(:,i - 1) * tghCos(:,i) )
-            RTEupSen(:,i) = ( AdmIntSen(:,i) - AdmApupSen(:,i - 1) ) / ( AdmIntSen(:,i) + AdmApupSen(:,i - 1) )
-            RTEupCos(:,i) = ( AdmIntCos(:,i) - AdmApupCos(:,i - 1) ) / ( AdmIntCos(:,i) + AdmApupCos(:,i - 1) )
-            RTMupSen(:,i) = ( ImpIntSen(:,i) - ImpApupSen(:,i - 1) ) / ( ImpIntSen(:,i) + ImpApupSen(:,i - 1) )
-            RTMupCos(:,i) = ( ImpIntCos(:,i) - ImpApupCos(:,i - 1) ) / ( ImpIntCos(:,i) + ImpApupCos(:,i - 1) )
-
-    end if
+  AdmApupSen(:,0) = AdmIntSen(:,0)
+  AdmApupCos(:,0) = AdmIntCos(:,0)
+  ImpApupSen(:,0) = ImpIntSen(:,0)
+  ImpApupCos(:,0) = ImpIntCos(:,0)
+  RTEupSen(:,0) = (0.d0,0.d0)
+  RTEupCos(:,0) = (0.d0,0.d0)
+  RTMupSen(:,0) = (0.d0,0.d0)
+  RTMupCos(:,0) = (0.d0,0.d0)
+  do i = 1, n - 1
+    AdmApupSen(:,i) = AdmIntSen(:,i) * ( AdmApupSen(:,i - 1) + AdmIntSen(:,i) * &
+                      tghSen(:,i) ) / ( AdmIntSen(:,i) + AdmApupSen(:,i - 1) * tghSen(:,i) )
+    AdmApupCos(:,i) = AdmIntCos(:,i) * ( AdmApupCos(:,i - 1) + AdmIntCos(:,i) * &
+                      tghCos(:,i) ) / ( AdmIntCos(:,i) + AdmApupCos(:,i - 1) * tghCos(:,i) )
+    ImpApupSen(:,i) = ImpIntSen(:,i) * ( ImpApupSen(:,i - 1) + ImpIntSen(:,i) * &
+                      tghSen(:,i) ) / ( ImpIntSen(:,i) + ImpApupSen(:,i - 1) * tghSen(:,i) )
+    ImpApupCos(:,i) = ImpIntCos(:,i) * ( ImpApupCos(:,i - 1) + ImpIntCos(:,i) * &
+                      tghCos(:,i) ) / ( ImpIntCos(:,i) + ImpApupCos(:,i - 1) * tghCos(:,i) )
+    RTEupSen(:,i) = ( AdmIntSen(:,i) - AdmApupSen(:,i - 1) ) / ( AdmIntSen(:,i) + AdmApupSen(:,i - 1) )
+    RTEupCos(:,i) = ( AdmIntCos(:,i) - AdmApupCos(:,i - 1) ) / ( AdmIntCos(:,i) + AdmApupCos(:,i - 1) )
+    RTMupSen(:,i) = ( ImpIntSen(:,i) - ImpApupSen(:,i - 1) ) / ( ImpIntSen(:,i) + ImpApupSen(:,i - 1) )
+    RTMupCos(:,i) = ( ImpIntCos(:,i) - ImpApupCos(:,i - 1) ) / ( ImpIntCos(:,i) + ImpApupCos(:,i - 1) )
   end do
-    RTEupSen(:,n)=(AdmIntSen(:,n)-AdmApupSen(:,n-1))/(AdmIntSen(:,n)+AdmApupSen(:,n-1))
-    RTEupCos(:,n)=(AdmIntCos(:,n)-AdmApupCos(:,n-1))/(AdmIntCos(:,n)+AdmApupCos(:,n-1))
-    RTMupSen(:,n)=(ImpIntSen(:,n)-ImpApupSen(:,n-1))/(ImpIntSen(:,n)+ImpApupSen(:,n-1))
-    RTMupCos(:,n)=(ImpIntCos(:,n)-ImpApupCos(:,n-1))/(ImpIntCos(:,n)+ImpApupCos(:,n-1))
+  RTEupSen(:,n)=(AdmIntSen(:,n)-AdmApupSen(:,n-1))/(AdmIntSen(:,n)+AdmApupSen(:,n-1))
+  RTEupCos(:,n)=(AdmIntCos(:,n)-AdmApupCos(:,n-1))/(AdmIntCos(:,n)+AdmApupCos(:,n-1))
+  RTMupSen(:,n)=(ImpIntSen(:,n)-ImpApupSen(:,n-1))/(ImpIntSen(:,n)+ImpApupSen(:,n-1))
+  RTMupCos(:,n)=(ImpIntCos(:,n)-ImpApupCos(:,n-1))/(ImpIntCos(:,n)+ImpApupCos(:,n-1))
 
-    allocate( AMdwSen(npts), AMdwCos(nptc), AMupSen(npts), AMupCos(nptc) )
-    allocate( FEdwSen(npts), FEdwCos(nptc), FEupSen(npts), FEupCos(nptc) )
+  allocate( AMdwSen(npts), AMdwCos(nptc), AMupSen(npts), AMupCos(nptc) )
+  allocate( FEdwSen(npts), FEdwCos(nptc), FEupSen(npts), FEupCos(nptc) )
 
   AMdwSen = ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) + RTMupSen(:,camadT) * &
-                exp( uSen(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTMupSen(:,camadT) * RTMdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
+            exp( uSen(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTMupSen(:,camadT) * RTMdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
   AMdwCos = ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) + RTMupCos(:,camadT) * &
-        exp( uCos(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTMupCos(:,camadT) * RTMdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
+            exp( uCos(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTMupCos(:,camadT) * RTMdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
 
   AMupSen = ( exp( uSen(:,camadT) * ( prof(camadT - 1) - h0 ) ) + RTMdwSen(:,camadT) * &
-        exp( -uSen(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTMupSen(:,camadT) * RTMdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
+            exp( -uSen(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTMupSen(:,camadT) * RTMdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
   AMupCos = ( exp( uCos(:,camadT) * ( prof(camadT - 1) - h0 ) ) + RTMdwCos(:,camadT) * &
-        exp( -uCos(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTMupCos(:,camadT) * RTMdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
+            exp( -uCos(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTMupCos(:,camadT) * RTMdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
 
   FEdwSen = ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) - RTEupSen(:,camadT) * &
-        exp( uSen(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTEupSen(:,camadT) * RTEdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
+            exp( uSen(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTEupSen(:,camadT) * RTEdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
   FEdwCos = ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) - RTEupCos(:,camadT) * &
-        exp( uCos(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTEupCos(:,camadT) * RTEdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
+            exp( uCos(:,camadT) * ( prof(camadT - 1) - h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTEupCos(:,camadT) * RTEdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
 
   FEupSen = ( exp( uSen(:,camadT) * ( prof(camadT - 1) - h0 ) ) - RTEdwSen(:,camadT) * &
-        exp( -uSen(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTEupSen(:,camadT) * RTEdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
+            exp( -uSen(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTEupSen(:,camadT) * RTEdwSen(:,camadT) * exp( -2.d0 * uhSen(:,camadT) ) )
   FEupCos = ( exp( uCos(:,camadT) * ( prof(camadT - 1) - h0 ) ) - RTEdwCos(:,camadT) * &
-        exp( -uCos(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
-        ( 1.d0 - RTEupCos(:,camadT) * RTEdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
+            exp( -uCos(:,camadT) * ( prof(camadT) + h(camadT) - h0 ) ) ) / &
+            ( 1.d0 - RTEupCos(:,camadT) * RTEdwCos(:,camadT) * exp( -2.d0 * uhCos(:,camadT) ) )
 
   if ( camad > camadT ) then
     deallocate( TMdwSen, TMdwCos, TEdwSen, TEdwCos )
@@ -969,58 +943,46 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
     allocate( TEdwSen(npts,camadT : camad), TEdwCos(nptc,camadT : camad) )
     do j = camadT, camad
       if ( j == camadT ) then
-
-                TMdwSen(:,j) = zeta * mx / ( 2.d0 * ImpIntSen(:,camadT) )
-                TMdwCos(:,j) = zeta * mx / ( 2.d0 * ImpIntCos(:,camadT) )
-                TEdwSen(:,j) = - zeta * mx / 2.d0
-                TEdwCos(:,j) = - zeta * mx / 2.d0
-
+        TMdwSen(:,j) = zeta * mx / ( 2.d0 * ImpIntSen(:,camadT) )
+        TMdwCos(:,j) = zeta * mx / ( 2.d0 * ImpIntCos(:,camadT) )
+        TEdwSen(:,j) = - zeta * mx / 2.d0
+        TEdwCos(:,j) = - zeta * mx / 2.d0
       else if ( j == (camadT + 1) .and. j == n ) then
-
-                TMdwSen(:,j) = TMdwSen(:,j - 1) * ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) + &
-                                RTMupSen(:,camadT) * AMupSen(:) * exp( -uhSen(:,camadT) ) + RTMdwSen(:,camadT) * AMdwSen(:) )
-                TMdwCos(:,j) = TMdwCos(:,j - 1) * ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) + &
-                                RTMupCos(:,camadT) * AMupCos(:) * exp( -uhCos(:,camadT) ) + RTMdwCos(:,camadT) * AMdwCos(:) )
-
-                TEdwSen(:,j) = TEdwSen(:,j - 1) * ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) - &
-                                RTEupSen(:,camadT) * FEupSen(:) * exp( -uhSen(:,camadT) ) + RTEdwSen(:,camadT) * FEdwSen(:) )
-                TEdwCos(:,j) = TEdwCos(:,j - 1) * ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) - &
-                                RTEupCos(:,camadT) * FEupCos(:) * exp( -uhCos(:,camadT) ) + RTEdwCos(:,camadT) * FEdwCos(:) )
-
+        TMdwSen(:,j) = TMdwSen(:,j - 1) * ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) + &
+                      RTMupSen(:,camadT) * AMupSen(:) * exp( -uhSen(:,camadT) ) + RTMdwSen(:,camadT) * AMdwSen(:) )
+        TMdwCos(:,j) = TMdwCos(:,j - 1) * ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) + &
+                      RTMupCos(:,camadT) * AMupCos(:) * exp( -uhCos(:,camadT) ) + RTMdwCos(:,camadT) * AMdwCos(:) )
+        TEdwSen(:,j) = TEdwSen(:,j - 1) * ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) - &
+                      RTEupSen(:,camadT) * FEupSen(:) * exp( -uhSen(:,camadT) ) + RTEdwSen(:,camadT) * FEdwSen(:) )
+        TEdwCos(:,j) = TEdwCos(:,j - 1) * ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) - &
+                      RTEupCos(:,camadT) * FEupCos(:) * exp( -uhCos(:,camadT) ) + RTEdwCos(:,camadT) * FEdwCos(:) )
       else if ( j == (camadT + 1) .and. j /= n ) then
-
-                TMdwSen(:,j) = TMdwSen(:,j - 1) * ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) + &
-                                RTMupSen(:,camadT) * AMupSen(:) * exp( -uhSen(:,camadT) ) + &
-                                RTMdwSen(:,camadT) * AMdwSen(:) ) / ( 1.d0 + RTMdwSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TMdwCos(:,j) = TMdwCos(:,j - 1) * ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) + &
-                                RTMupCos(:,camadT) * AMupCos(:) * exp( -uhCos(:,camadT) ) + &
-                                RTMdwCos(:,camadT) * AMdwCos(:) ) / ( 1.d0 + RTMdwCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-
-                TEdwSen(:,j)=TEdwSen(:,j-1)*(exp(-uSen(:,camadT)*(prof(camadT)-h0)) - &
-                    RTEupSen(:,camadT)*FEupSen(:)*exp(-uhSen(:,camadT)) + &
-                    RTEdwSen(:,camadT)*FEdwSen(:)) / (1.d0 + RTEdwSen(:,j)*exp(-2.d0*uhSen(:,j)))
-                TEdwCos(:,j)=TEdwCos(:,j-1)*(exp(-uCos(:,camadT)*(prof(camadT)-h0)) - &
-                    RTEupCos(:,camadT)*FEupCos(:)*exp(-uhCos(:,camadT)) + &
-                    RTEdwCos(:,camadT)*FEdwCos(:)) / (1.d0 + RTEdwCos(:,j)*exp(-2.d0*uhCos(:,j)))
-
+        TMdwSen(:,j) = TMdwSen(:,j - 1) * ( exp( -uSen(:,camadT) * ( prof(camadT) - h0 ) ) + &
+                      RTMupSen(:,camadT) * AMupSen(:) * exp( -uhSen(:,camadT) ) + &
+                      RTMdwSen(:,camadT) * AMdwSen(:) ) / ( 1.d0 + RTMdwSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TMdwCos(:,j) = TMdwCos(:,j - 1) * ( exp( -uCos(:,camadT) * ( prof(camadT) - h0 ) ) + &
+                      RTMupCos(:,camadT) * AMupCos(:) * exp( -uhCos(:,camadT) ) + &
+                      RTMdwCos(:,camadT) * AMdwCos(:) ) / ( 1.d0 + RTMdwCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
+        TEdwSen(:,j) = TEdwSen(:,j-1)*(exp(-uSen(:,camadT)*(prof(camadT)-h0)) - &
+                      RTEupSen(:,camadT)*FEupSen(:)*exp(-uhSen(:,camadT)) + &
+                      RTEdwSen(:,camadT)*FEdwSen(:)) / (1.d0 + RTEdwSen(:,j)*exp(-2.d0*uhSen(:,j)))
+        TEdwCos(:,j) = TEdwCos(:,j-1)*(exp(-uCos(:,camadT)*(prof(camadT)-h0)) - &
+                      RTEupCos(:,camadT)*FEupCos(:)*exp(-uhCos(:,camadT)) + &
+                      RTEdwCos(:,camadT)*FEdwCos(:)) / (1.d0 + RTEdwCos(:,j)*exp(-2.d0*uhCos(:,j)))
       else if ( j /= n ) then
-
-                TMdwSen(:,j) = TMdwSen(:,j - 1) * ( 1.d0 + RTMdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) ) / &
-                                ( 1.d0 + RTMdwSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TMdwCos(:,j) = TMdwCos(:,j - 1) * ( 1.d0 + RTMdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) ) / &
-                                ( 1.d0 + RTMdwCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-                TEdwSen(:,j) = TEdwSen(:,j - 1) * ( 1.d0 + RTEdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) ) / &
-                                ( 1.d0 + RTEdwSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TEdwCos(:,j) = TEdwCos(:,j - 1) * ( 1.d0 + RTEdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) ) / &
-                                ( 1.d0 + RTEdwCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-
+        TMdwSen(:,j) = TMdwSen(:,j - 1) * ( 1.d0 + RTMdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) ) / &
+                      ( 1.d0 + RTMdwSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TMdwCos(:,j) = TMdwCos(:,j - 1) * ( 1.d0 + RTMdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) ) / &
+                      ( 1.d0 + RTMdwCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
+        TEdwSen(:,j) = TEdwSen(:,j - 1) * ( 1.d0 + RTEdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) ) / &
+                      ( 1.d0 + RTEdwSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TEdwCos(:,j) = TEdwCos(:,j - 1) * ( 1.d0 + RTEdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) ) / &
+                      ( 1.d0 + RTEdwCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
       else if ( j == n ) then
-
-                TMdwSen(:,j) = TMdwSen(:,j - 1) * ( 1.d0 + RTMdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) )
-                TMdwCos(:,j) = TMdwCos(:,j - 1) * ( 1.d0 + RTMdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) )
-                TEdwSen(:,j) = TEdwSen(:,j - 1) * ( 1.d0 + RTEdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) )
-                TEdwCos(:,j) = TEdwCos(:,j - 1) * ( 1.d0 + RTEdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) )
-
+        TMdwSen(:,j) = TMdwSen(:,j - 1) * ( 1.d0 + RTMdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) )
+        TMdwCos(:,j) = TMdwCos(:,j - 1) * ( 1.d0 + RTMdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) )
+        TEdwSen(:,j) = TEdwSen(:,j - 1) * ( 1.d0 + RTEdwSen(:,j - 1) ) * exp( -uhSen(:,j - 1) )
+        TEdwCos(:,j) = TEdwCos(:,j - 1) * ( 1.d0 + RTEdwCos(:,j - 1) ) * exp( -uhCos(:,j - 1) )
       end if
     end do
   else if ( camad < camadT ) then
@@ -1029,58 +991,46 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
     allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
     do j = camadT, camad, -1
       if ( j == camadT ) then
-
-                TMupSen(:,j) = zeta * mx / ( 2.d0 * ImpIntSen(:,camadT) )
-                TMupCos(:,j) = zeta * mx / ( 2.d0 * ImpIntCos(:,camadT) )
-                TEupSen(:,j) = zeta * mx / 2.d0
-                TEupCos(:,j) = zeta * mx / 2.d0
-
+        TMupSen(:,j) = zeta * mx / ( 2.d0 * ImpIntSen(:,camadT) )
+        TMupCos(:,j) = zeta * mx / ( 2.d0 * ImpIntCos(:,camadT) )
+        TEupSen(:,j) = zeta * mx / 2.d0
+        TEupCos(:,j) = zeta * mx / 2.d0
       else if ( j == (camadT - 1) .and. j == 0 ) then
-
-                TMupSen(:,j) = TMupSen(:,j + 1) * ( exp( -uSen(:,camadT) * h0 ) + &
-                                RTMupSen(:,camadT) * AMupSen(:) + RTMdwSen(:,camadT) * AMdwSen(:) * exp( -uhSen(:,camadT) ) )
-                TMupCos(:,j) = TMupCos(:,j + 1) * ( exp( -uCos(:,camadT) * h0 ) + &
-                                RTMupCos(:,camadT) * AMupCos(:) + RTMdwCos(:,camadT) * AMdwCos(:) * exp( -uhCos(:,camadT) ) )
-
-                TEupSen(:,j) = TEupSen(:,j + 1) * ( exp( -uSen(:,camadT) * h0 ) + &
-                                RTEupSen(:,camadT) * FEupSen(:) - RTEdwSen(:,camadT) * FEdwSen(:) * exp( -uhSen(:,camadT) ) )
-                TEupCos(:,j) = TEupCos(:,j + 1) * ( exp( -uCos(:,camadT) * h0 ) + &
-                                RTEupCos(:,camadT) * FEupCos(:) - RTEdwCos(:,camadT) * FEdwCos(:) * exp( -uhCos(:,camadT) ) )
-
+        TMupSen(:,j) = TMupSen(:,j + 1) * ( exp( -uSen(:,camadT) * h0 ) + &
+                      RTMupSen(:,camadT) * AMupSen(:) + RTMdwSen(:,camadT) * AMdwSen(:) * exp( -uhSen(:,camadT) ) )
+        TMupCos(:,j) = TMupCos(:,j + 1) * ( exp( -uCos(:,camadT) * h0 ) + &
+                      RTMupCos(:,camadT) * AMupCos(:) + RTMdwCos(:,camadT) * AMdwCos(:) * exp( -uhCos(:,camadT) ) )
+        TEupSen(:,j) = TEupSen(:,j + 1) * ( exp( -uSen(:,camadT) * h0 ) + &
+                      RTEupSen(:,camadT) * FEupSen(:) - RTEdwSen(:,camadT) * FEdwSen(:) * exp( -uhSen(:,camadT) ) )
+        TEupCos(:,j) = TEupCos(:,j + 1) * ( exp( -uCos(:,camadT) * h0 ) + &
+                      RTEupCos(:,camadT) * FEupCos(:) - RTEdwCos(:,camadT) * FEdwCos(:) * exp( -uhCos(:,camadT) ) )
       else if ( j == (camadT - 1) .and. j /= 0 ) then
-
-                TMupSen(:,j) = TMupSen(:,j + 1) * ( exp( uSen(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
-                                RTMupSen(:,camadT) * AMupSen(:) + RTMdwSen(:,camadT) * AMdwSen(:) * &
-                                exp( -uhSen(:,camadT) ) ) / ( 1.d0 + RTMupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TMupCos(:,j) = TMupCos(:,j + 1) * ( exp( uCos(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
-                                RTMupCos(:,camadT) * AMupCos(:) + RTMdwCos(:,camadT) * AMdwCos(:) * &
-                                exp( -uhCos(:,camadT) ) ) / ( 1.d0 + RTMupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-
-                TEupSen(:,j) = TEupSen(:,j + 1) * ( exp( uSen(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
-                                RTEupSen(:,camadT) * FEupSen(:) - RTEdwSen(:,camadT) * FEdwSen(:) * &
-                                exp( -uhSen(:,camadT) ) ) / ( 1.d0 + RTEupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TEupCos(:,j) = TEupCos(:,j + 1) * ( exp( uCos(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
-                                RTEupCos(:,camadT) * FEupCos(:) - RTEdwCos(:,camadT) * FEdwCos(:) * &
-                                exp( -uhCos(:,camadT) ) ) / ( 1.d0 + RTEupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-
+        TMupSen(:,j) = TMupSen(:,j + 1) * ( exp( uSen(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
+                      RTMupSen(:,camadT) * AMupSen(:) + RTMdwSen(:,camadT) * AMdwSen(:) * &
+                      exp( -uhSen(:,camadT) ) ) / ( 1.d0 + RTMupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TMupCos(:,j) = TMupCos(:,j + 1) * ( exp( uCos(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
+                      RTMupCos(:,camadT) * AMupCos(:) + RTMdwCos(:,camadT) * AMdwCos(:) * &
+                      exp( -uhCos(:,camadT) ) ) / ( 1.d0 + RTMupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
+        TEupSen(:,j) = TEupSen(:,j + 1) * ( exp( uSen(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
+                      RTEupSen(:,camadT) * FEupSen(:) - RTEdwSen(:,camadT) * FEdwSen(:) * &
+                      exp( -uhSen(:,camadT) ) ) / ( 1.d0 + RTEupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TEupCos(:,j) = TEupCos(:,j + 1) * ( exp( uCos(:,camadT) * ( prof(camadT - 1) - h0 ) ) + &
+                      RTEupCos(:,camadT) * FEupCos(:) - RTEdwCos(:,camadT) * FEdwCos(:) * &
+                      exp( -uhCos(:,camadT) ) ) / ( 1.d0 + RTEupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
       else if ( j /= 0 ) then
-
-                TMupSen(:,j) = TMupSen(:,j + 1) * ( 1.d0 + RTMupSen(:,j + 1) ) * exp( -uhSen(:,j + 1) ) / &
-                                ( 1.d0 + RTMupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TMupCos(:,j) = TMupCos(:,j + 1) * ( 1.d0 + RTMupCos(:,j + 1) ) * exp( -uhCos(:,j + 1) ) / &
-                                ( 1.d0 + RTMupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-                TEupSen(:,j) = TEupSen(:,j + 1) * ( 1.d0 + RTEupSen(:,j + 1) ) * exp( -uhSen(:,j + 1) ) / &
-                                ( 1.d0 + RTEupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
-                TEupCos(:,j) = TEupCos(:,j + 1) * ( 1.d0 + RTEupCos(:,j + 1) ) * exp( -uhCos(:,j + 1) ) / &
-                                ( 1.d0 + RTEupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
-
+        TMupSen(:,j) = TMupSen(:,j + 1) * ( 1.d0 + RTMupSen(:,j + 1) ) * exp( -uhSen(:,j + 1) ) / &
+                      ( 1.d0 + RTMupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TMupCos(:,j) = TMupCos(:,j + 1) * ( 1.d0 + RTMupCos(:,j + 1) ) * exp( -uhCos(:,j + 1) ) / &
+                      ( 1.d0 + RTMupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
+        TEupSen(:,j) = TEupSen(:,j + 1) * ( 1.d0 + RTEupSen(:,j + 1) ) * exp( -uhSen(:,j + 1) ) / &
+                      ( 1.d0 + RTEupSen(:,j) * exp( -2.d0 * uhSen(:,j) ) )
+        TEupCos(:,j) = TEupCos(:,j + 1) * ( 1.d0 + RTEupCos(:,j + 1) ) * exp( -uhCos(:,j + 1) ) / &
+                      ( 1.d0 + RTEupCos(:,j) * exp( -2.d0 * uhCos(:,j) ) )
       else if ( j == 0 ) then
-
-                TMupSen(:,j) = TMupSen(:,1) * ( 1.d0 + RTMupSen(:,1) ) * exp( -uhSen(:,1) )
-                TMupCos(:,j) = TMupCos(:,1) * ( 1.d0 + RTMupCos(:,1) ) * exp( -uhCos(:,1) )
-                TEupSen(:,j) = TEupSen(:,1) * ( 1.d0 + RTEupSen(:,1) ) * exp( -uhSen(:,1) )
-                TEupCos(:,j) = TEupCos(:,1) * ( 1.d0 + RTEupCos(:,1) ) * exp( -uhCos(:,1) )
-
+        TMupSen(:,j) = TMupSen(:,1) * ( 1.d0 + RTMupSen(:,1) ) * exp( -uhSen(:,1) )
+        TMupCos(:,j) = TMupCos(:,1) * ( 1.d0 + RTMupCos(:,1) ) * exp( -uhCos(:,1) )
+        TEupSen(:,j) = TEupSen(:,1) * ( 1.d0 + RTEupSen(:,1) ) * exp( -uhSen(:,1) )
+        TEupCos(:,j) = TEupCos(:,1) * ( 1.d0 + RTEupCos(:,1) ) * exp( -uhCos(:,1) )
       end if
     end do
   else
@@ -1091,17 +1041,16 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
     allocate( TEupSen(npts,camad : camadT), TEupCos(nptc,camad : camadT) )
 
     TMdwSen(:,camad) = zeta * mx / (2.d0 * ImpIntSen(:,camadT))
-      TMdwCos(:,camad) = zeta * mx / (2.d0 * ImpIntCos(:,camadT))
+    TMdwCos(:,camad) = zeta * mx / (2.d0 * ImpIntCos(:,camadT))
 
-      TEdwSen(:,camad) = - zeta * mx / 2.d0
-      TEdwCos(:,camad) = - zeta * mx / 2.d0
+    TEdwSen(:,camad) = - zeta * mx / 2.d0
+    TEdwCos(:,camad) = - zeta * mx / 2.d0
 
-      TMupSen(:,camad) = TMdwSen(:,camad)
-      TMupCos(:,camad) = TMdwCos(:,camad)
+    TMupSen(:,camad) = TMdwSen(:,camad)
+    TMupCos(:,camad) = TMdwCos(:,camad)
 
-      TEupSen(:,camad) = - TEdwSen(:,camad)
-      TEupCos(:,camad) = - TEdwCos(:,camad)
-
+    TEupSen(:,camad) = - TEdwSen(:,camad)
+    TEupCos(:,camad) = - TEdwCos(:,camad)
   end if
 
   allocate(Ktmdz_Sen(npts),Ktmdz_Cos(nptc),Ktm_Sen(npts),Ktm_Cos(nptc),Kte_Sen(npts),Kte_Cos(nptc),Ktedz_Sen(npts),Ktedz_Cos(nptc))
@@ -1109,7 +1058,6 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
   allocate(kernelHx(npts),kernelHy(nptc),kernelHz(nptc))
 
   if ( camad == 0 .and. camadT /= 0 ) then
-
     Ktmdz_Sen = ImpIntSen(:,0) * TMupSen(:,0) * exp( uSen(:,0) * z )
     Ktmdz_Cos = ImpIntCos(:,0) * TMupCos(:,0) * exp( uCos(:,0) * z )
     Kte_Sen = TEupSen(:,0) * exp( uSen(:,0) * z )
@@ -1137,9 +1085,7 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
 
     kernelHz = ( cmplx(0.d0,kxsen,kind=dp) / zeta * Kte_Sen ) * w_sen
     Hz_ky = (0.d0,1.d0) * sum( kernelHz ) / ( pi * x )
-
   else if ( camad < camadT ) then !camada k
-
     Ktmdz_Sen = ImpIntSen(:,camad) * TMupSen(:,camad) * ( exp( uSen(:,camad) * ( z - prof(camad) ) ) - &
                     RTMupSen(:,camad) * exp( -uSen(:,camad) * ( z - prof(camad - 1) + h(camad) ) ) )
     ktmdz_Cos = ImpIntCos(:,camad) * TMupCos(:,camad) * ( exp( uCos(:,camad) * ( z - prof(camad) ) ) - &
@@ -1148,7 +1094,6 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
                     RTEupSen(:,camad) * exp( -uSen(:,camad) * ( z - prof(camad - 1) + h(camad) ) ) )
     Kte_Cos = TEupCos(:,camad) * ( exp( uCos(:,camad) * ( z - prof(camad) ) ) + &
                     RTEupCos(:,camad) * exp( -uCos(:,camad) * ( z - prof(camad - 1) + h(camad) ) ) )
-
     ktm_Sen = TMupSen(:,camad) * ( exp( uSen(:,camad) * ( z - prof(camad) ) ) + &
                     RTMupSen(:,camad) * exp( -uSen(:,camad) * ( z - prof(camad - 1) + h(camad) ) ) )
     ktm_Cos = TMupCos(:,camad) * ( exp( uCos(:,camad) * ( z - prof(camad) ) ) + &
@@ -1175,9 +1120,7 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
 
     kernelHz = ( cmplx(0.d0,kxsen,kind=dp) / zeta * Kte_Sen ) * w_sen
     Hz_ky = (0.d0,1.d0) * sum( kernelHz ) / ( pi * x )
-
   else if ( camad == camadT .and. z <= h0 ) then  !na mesma camada do transmissor mas acima dele
-
     Ktmdz_Sen = ImpIntSen(:,camad) * TMupSen(:,camad) * ( exp( uSen(:,camad) * ( z - h0 ) ) - &
                     RTMupSen(:,camad) * AMupSen(:) * exp( -uSen(:,camad) * ( z - prof(camad - 1) ) ) + &
                     RTMdwSen(:,camad) * AMdwSen(:) * exp( uSen(:,camad) * ( z - prof(camad) ) ) )
@@ -1190,11 +1133,10 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
     Kte_Cos = TEupCos(:,camad) * ( exp( uCos(:,camad) * ( z - h0 ) ) + &
                     RTEupCos(:,camad) * FEupCos(:) * exp( -uCos(:,camad) * ( z - prof(camad - 1) ) ) - &
                     RTEdwCos(:,camad) * FEdwCos(:) * exp( uCos(:,camad) * ( z - prof(camad) ) ) )
-
     Ktm_Sen = TMupSen(:,camad) * ( exp( uSen(:,camad) * ( z - h0 ) ) + &
                     RTMupSen(:,camad) * AMupSen(:) * exp( -uSen(:,camad) * ( z - prof(camad - 1) ) ) + &
                     RTMdwSen(:,camad) * AMdwSen(:) * exp( uSen(:,camad) * ( z - prof(camad) ) ) )
-        Ktm_Cos = TMupCos(:,camad) * ( exp( uCos(:,camad) * ( z - h0 ) ) + &
+    Ktm_Cos = TMupCos(:,camad) * ( exp( uCos(:,camad) * ( z - h0 ) ) + &
                     RTMupCos(:,camad) * AMupCos(:) * exp( -uCos(:,camad) * ( z - prof(camad - 1) ) ) + &
                     RTMdwCos(:,camad) * AMdwCos(:) * exp( uCos(:,camad) * ( z - prof(camad) ) ) )
     Ktedz_Sen = AdmIntSen(:,camad) * TEupSen(:,camad) * ( exp( uSen(:,camad) * ( z - h0 ) ) - &
@@ -1211,11 +1153,11 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
     Ey_ky = sum( kernelEy ) / ( pi * dabs(x) )
 
     if ( camad /= 0 ) then
-            kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
-            Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * condut(camad) )
+      kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
+      Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * condut(camad) )
     else
-            kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
-            Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * neta )
+      kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
+      Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * neta )
     end if
 
     kernelHx = ( ( -ky * ky * Ktm_Cos - kxcos * kxcos * Ktedz_Cos ) / kr2cos ) * w_cos
@@ -1262,11 +1204,11 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
     Ey_ky = sum( kernelEy ) / ( pi * dabs(x) )
 
     if ( camad /= 0 ) then
-            kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
-            Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * condut(camad) )
+      kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
+      Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * condut(camad) )
     else
-            kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
-            Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * neta )
+      kernelEz = cmplx(0.d0,ky,kind=dp) * Ktm_Cos  * w_cos
+      Ez_ky = sum( kernelEz ) / ( pi * dabs(x) * neta )
     end if
 
     kernelHx =  ( ( -ky * ky * Ktm_Cos + kxcos * kxcos * Ktedz_Cos ) / kr2cos ) * w_cos
@@ -1315,9 +1257,7 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
 
     kernelHz = ( cmplx(0.d0,kxsen,kind=dp) / zeta * Kte_Sen ) * w_sen
     Hz_ky = (0.d0,1.d0) * sum( kernelHz ) / ( pi * x )
-
   else  !camada n
-
     Ktmdz_Sen = ImpIntSen(:,n) * TMdwSen(:,n) * exp( -uSen(:,n) * ( z - prof(n - 1) ) )
     Ktmdz_Cos = ImpIntCos(:,n) * TMdwCos(:,n) * exp( -uCos(:,n) * ( z - prof(n - 1) ) )
     Kte_Sen = TEdwSen(:,n) * exp( -uSen(:,n) * ( z - prof(n - 1) ) )
@@ -1345,7 +1285,6 @@ allocate( TEdwSen(1,1), TEdwCos(1,1) )
 
     kernelHz = ( cmplx(0.d0,kxsen,kind=dp) / zeta * Kte_Sen ) * w_sen
     Hz_ky = (0.d0,1.d0) * sum( kernelHz ) / ( pi * x )
-
   end if
 
   deallocate( h, KxSen, KxCos, w_Sen, w_Cos )

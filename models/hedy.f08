@@ -78,20 +78,18 @@ contains
   allocate(wvnb2(0:n),uJ0(nJ0,0:n),uJ1(nJ1,0:n),AdmIntJ0(nJ0,0:n),AdmIntJ1(nJ1,0:n),ImpIntJ0(nJ0,0:n),ImpIntJ1(nJ1,0:n))
   allocate(uhJ0(nJ0,0:n),uhJ1(nJ1,0:n),tghJ0(nJ0,0:n),tghJ1(nJ1,0:n))
 !
-  do i=0,n
-    if (i==0) then
-    wvnb2(i)=-zeta*neta
-    uJ0(:,i)=sqrt(krJ0*krJ0-wvnb2(i))
-    uJ1(:,i)=sqrt(krJ1*krJ1-wvnb2(i))
-    AdmIntJ0(:,i)=uJ0(:,i)/zeta
-    AdmIntJ1(:,i)=uJ1(:,i)/zeta
-    ImpIntJ0(:,i)=uJ0(:,i)/neta
-    ImpIntJ1(:,i)=uJ1(:,i)/neta
-    uhJ0(:,i)=uJ0(:,i)*h(i)
-    uhJ1(:,i)=uJ1(:,i)*h(i)
-    tghJ0(:,i)=(1.d0-exp(-2.d0*uhJ0(:,i)))/(1.d0+exp(-2.d0*uhJ0(:,i)))
-    tghJ1(:,i)=(1.d0-exp(-2.d0*uhJ1(:,i)))/(1.d0+exp(-2.d0*uhJ1(:,i)))
-    else
+  wvnb2(0)=-zeta*neta
+  uJ0(:,0)=sqrt(krJ0*krJ0-wvnb2(0))
+  uJ1(:,0)=sqrt(krJ1*krJ1-wvnb2(0))
+  AdmIntJ0(:,0)=uJ0(:,0)/zeta
+  AdmIntJ1(:,0)=uJ1(:,0)/zeta
+  ImpIntJ0(:,0)=uJ0(:,0)/neta
+  ImpIntJ1(:,0)=uJ1(:,0)/neta
+  uhJ0(:,0)=uJ0(:,0)*h(0)
+  uhJ1(:,0)=uJ1(:,0)*h(0)
+  tghJ0(:,0)=(1.d0-exp(-2.d0*uhJ0(:,0)))/(1.d0+exp(-2.d0*uhJ0(:,0)))
+  tghJ1(:,0)=(1.d0-exp(-2.d0*uhJ1(:,0)))/(1.d0+exp(-2.d0*uhJ1(:,0)))
+  do i=1,n
     wvnb2(i) = -zeta*condut(i)
     uJ0(:,i)=sqrt(krJ0*krJ0-wvnb2(i))
     uJ1(:,i)=sqrt(krJ1*krJ1-wvnb2(i))
@@ -103,23 +101,20 @@ contains
     uhJ1(:,i)=uJ1(:,i)*h(i)
     tghJ0(:,i)=(1.d0-exp(-2.d0*uhJ0(:,i)))/(1.d0+exp(-2.d0*uhJ0(:,i)))
     tghJ1(:,i)=(1.d0-exp(-2.d0*uhJ1(:,i)))/(1.d0+exp(-2.d0*uhJ1(:,i)))
-    end if
   end do
 
   allocate(AdmApdwJ0(nJ0,1:n),AdmApdwJ1(nJ1,1:n),ImpApdwJ0(nJ0,1:n),ImpApdwJ1(nJ1,1:n))
   allocate(RTEdwJ0(nJ0,0:n),RTEdwJ1(nJ1,0:n),RTMdwJ0(nJ0,0:n),RTMdwJ1(nJ1,0:n))
 
-  do i=n,1,-1
-    if (i==n) then
-    AdmApdwJ0(:,i)=AdmIntJ0(:,i)
-    AdmApdwJ1(:,i)=AdmIntJ1(:,i)
-    ImpApdwJ0(:,i)=ImpIntJ0(:,i)
-    ImpApdwJ1(:,i)=ImpIntJ1(:,i)
-    RTEdwJ0(:,i)=(0.d0,0.d0)
-    RTEdwJ1(:,i)=(0.d0,0.d0)
-    RTMdwJ0(:,i)=(0.d0,0.d0)
-    RTMdwJ1(:,i)=(0.d0,0.d0)
-    else
+  AdmApdwJ0(:,n)=AdmIntJ0(:,n)
+  AdmApdwJ1(:,n)=AdmIntJ1(:,n)
+  ImpApdwJ0(:,n)=ImpIntJ0(:,n)
+  ImpApdwJ1(:,n)=ImpIntJ1(:,n)
+  RTEdwJ0(:,n)=(0.d0,0.d0)
+  RTEdwJ1(:,n)=(0.d0,0.d0)
+  RTMdwJ0(:,n)=(0.d0,0.d0)
+  RTMdwJ1(:,n)=(0.d0,0.d0)
+  do i=n-1,1,-1
     AdmApdwJ0(:,i)=AdmIntJ0(:,i)*(AdmApdwJ0(:,i+1)+AdmIntJ0(:,i)* &
       tghJ0(:,i))/(AdmIntJ0(:,i)+AdmApdwJ0(:,i+1)*tghJ0(:,i))
     AdmApdwJ1(:,i)=AdmIntJ1(:,i)*(AdmApdwJ1(:,i+1)+AdmIntJ1(:,i)* &
@@ -132,27 +127,24 @@ contains
     RTEdwJ1(:,i)=(AdmIntJ1(:,i)-AdmApdwJ1(:,i+1))/(AdmIntJ1(:,i)+AdmApdwJ1(:,i+1))
     RTMdwJ0(:,i)=(ImpIntJ0(:,i)-ImpApdwJ0(:,i+1))/(ImpIntJ0(:,i)+ImpApdwJ0(:,i+1))
     RTMdwJ1(:,i)=(ImpIntJ1(:,i)-ImpApdwJ1(:,i+1))/(ImpIntJ1(:,i)+ImpApdwJ1(:,i+1))
-    end if
   end do
-    RTEdwJ0(:,0)=(AdmIntJ0(:,0)-AdmApdwJ0(:,1))/(AdmIntJ0(:,0)+AdmApdwJ0(:,1))
-    RTEdwJ1(:,0)=(AdmIntJ1(:,0)-AdmApdwJ1(:,1))/(AdmIntJ1(:,0)+AdmApdwJ1(:,1))
-    RTMdwJ0(:,0)=(ImpIntJ0(:,0)-ImpApdwJ0(:,1))/(ImpIntJ0(:,0)+ImpApdwJ0(:,1))
-    RTMdwJ1(:,0)=(ImpIntJ1(:,0)-ImpApdwJ1(:,1))/(ImpIntJ1(:,0)+ImpApdwJ1(:,1))
+  RTEdwJ0(:,0)=(AdmIntJ0(:,0)-AdmApdwJ0(:,1))/(AdmIntJ0(:,0)+AdmApdwJ0(:,1))
+  RTEdwJ1(:,0)=(AdmIntJ1(:,0)-AdmApdwJ1(:,1))/(AdmIntJ1(:,0)+AdmApdwJ1(:,1))
+  RTMdwJ0(:,0)=(ImpIntJ0(:,0)-ImpApdwJ0(:,1))/(ImpIntJ0(:,0)+ImpApdwJ0(:,1))
+  RTMdwJ1(:,0)=(ImpIntJ1(:,0)-ImpApdwJ1(:,1))/(ImpIntJ1(:,0)+ImpApdwJ1(:,1))
 
   allocate(AdmApupJ0(nJ0,0:n-1),AdmApupJ1(nJ1,0:n-1),ImpApupJ0(nJ0,0:n-1),ImpApupJ1(nJ1,0:n-1))
   allocate(RTEupJ0(nJ0,0:n),RTEupJ1(nJ1,0:n),RTMupJ0(nJ0,0:n),RTMupJ1(nJ1,0:n))
 
-  do i=0,n-1
-    if (i==0) then
-    AdmApupJ0(:,i)=AdmIntJ0(:,i)
-    AdmApupJ1(:,i)=AdmIntJ1(:,i)
-    ImpApupJ0(:,i)=ImpIntJ0(:,i)
-    ImpApupJ1(:,i)=ImpIntJ1(:,i)
-    RTEupJ0(:,i)=(0.d0,0.d0)
-    RTEupJ1(:,i)=(0.d0,0.d0)
-    RTMupJ0(:,i)=(0.d0,0.d0)
-    RTMupJ1(:,i)=(0.d0,0.d0)
-    else
+  AdmApupJ0(:,0)=AdmIntJ0(:,0)
+  AdmApupJ1(:,0)=AdmIntJ1(:,0)
+  ImpApupJ0(:,0)=ImpIntJ0(:,0)
+  ImpApupJ1(:,0)=ImpIntJ1(:,0)
+  RTEupJ0(:,0)=(0.d0,0.d0)
+  RTEupJ1(:,0)=(0.d0,0.d0)
+  RTMupJ0(:,0)=(0.d0,0.d0)
+  RTMupJ1(:,0)=(0.d0,0.d0)
+  do i=1,n-1
     AdmApupJ0(:,i)=AdmIntJ0(:,i)*(AdmApupJ0(:,i-1)+AdmIntJ0(:,i)* &
       tghJ0(:,i))/(AdmIntJ0(:,i)+AdmApupJ0(:,i-1)*tghJ0(:,i))
     AdmApupJ1(:,i)=AdmIntJ1(:,i)*(AdmApupJ1(:,i-1)+AdmIntJ1(:,i)* &
@@ -165,12 +157,11 @@ contains
     RTEupJ1(:,i)=(AdmIntJ1(:,i)-AdmApupJ1(:,i-1))/(AdmIntJ1(:,i)+AdmApupJ1(:,i-1))
     RTMupJ0(:,i)=(ImpIntJ0(:,i)-ImpApupJ0(:,i-1))/(ImpIntJ0(:,i)+ImpApupJ0(:,i-1))
     RTMupJ1(:,i)=(ImpIntJ1(:,i)-ImpApupJ1(:,i-1))/(ImpIntJ1(:,i)+ImpApupJ1(:,i-1))
-    end if
   end do
-    RTEupJ0(:,n)=(AdmIntJ0(:,n)-AdmApupJ0(:,n-1))/(AdmIntJ0(:,n)+AdmApupJ0(:,n-1))
-    RTEupJ1(:,n)=(AdmIntJ1(:,n)-AdmApupJ1(:,n-1))/(AdmIntJ1(:,n)+AdmApupJ1(:,n-1))
-    RTMupJ0(:,n)=(ImpIntJ0(:,n)-ImpApupJ0(:,n-1))/(ImpIntJ0(:,n)+ImpApupJ0(:,n-1))
-    RTMupJ1(:,n)=(ImpIntJ1(:,n)-ImpApupJ1(:,n-1))/(ImpIntJ1(:,n)+ImpApupJ1(:,n-1))
+  RTEupJ0(:,n)=(AdmIntJ0(:,n)-AdmApupJ0(:,n-1))/(AdmIntJ0(:,n)+AdmApupJ0(:,n-1))
+  RTEupJ1(:,n)=(AdmIntJ1(:,n)-AdmApupJ1(:,n-1))/(AdmIntJ1(:,n)+AdmApupJ1(:,n-1))
+  RTMupJ0(:,n)=(ImpIntJ0(:,n)-ImpApupJ0(:,n-1))/(ImpIntJ0(:,n)+ImpApupJ0(:,n-1))
+  RTMupJ1(:,n)=(ImpIntJ1(:,n)-ImpApupJ1(:,n-1))/(ImpIntJ1(:,n)+ImpApupJ1(:,n-1))
 
   allocate(AMdwJ0(nJ0),AMdwJ1(nJ1),AMupJ0(nJ0),AMupJ1(nJ1),FEdwJ0(nJ0),FEdwJ1(nJ1),FEupJ0(nJ0),FEupJ1(nJ1))
 
@@ -782,20 +773,19 @@ contains
 
   kr2sen = kxsen*kxsen+ky*ky
   kr2cos = kxcos*kxcos+ky*ky
-  do i=0,n
-    if (i==0) then
-    wvnb2(i)=-zeta*neta
-    uSen(:,i)=sqrt(kr2sen-wvnb2(i))
-    uCos(:,i)=sqrt(kr2cos-wvnb2(i))
-    AdmIntSen(:,i)=uSen(:,i)/zeta
-    AdmIntCos(:,i)=uCos(:,i)/zeta
-    ImpIntSen(:,i)=uSen(:,i)/neta
-    ImpIntCos(:,i)=uCos(:,i)/neta
-    uhSen(:,i)=uSen(:,i)*h(i)
-    uhCos(:,i)=uCos(:,i)*h(i)
-    tghSen(:,i)=(1.d0-exp(-2.d0*uhSen(:,i)))/(1.d0+exp(-2.d0*uhSen(:,i)))
-    tghCos(:,i)=(1.d0-exp(-2.d0*uhCos(:,i)))/(1.d0+exp(-2.d0*uhCos(:,i)))
-    else
+
+  wvnb2(0)=-zeta*neta
+  uSen(:,0)=sqrt(kr2sen-wvnb2(0))
+  uCos(:,0)=sqrt(kr2cos-wvnb2(0))
+  AdmIntSen(:,0)=uSen(:,0)/zeta
+  AdmIntCos(:,0)=uCos(:,0)/zeta
+  ImpIntSen(:,0)=uSen(:,0)/neta
+  ImpIntCos(:,0)=uCos(:,0)/neta
+  uhSen(:,0)=uSen(:,0)*h(0)
+  uhCos(:,0)=uCos(:,0)*h(0)
+  tghSen(:,0)=(1.d0-exp(-2.d0*uhSen(:,0)))/(1.d0+exp(-2.d0*uhSen(:,0)))
+  tghCos(:,0)=(1.d0-exp(-2.d0*uhCos(:,0)))/(1.d0+exp(-2.d0*uhCos(:,0)))
+  do i=1,n
     wvnb2(i) = -zeta*condut(i)
     uSen(:,i)=sqrt(kr2Sen-wvnb2(i))
     uCos(:,i)=sqrt(kr2Cos-wvnb2(i))
@@ -807,23 +797,20 @@ contains
     uhCos(:,i)=uCos(:,i)*h(i)
     tghSen(:,i)=(1.d0-exp(-2.d0*uhSen(:,i)))/(1.d0+exp(-2.d0*uhSen(:,i)))
     tghCos(:,i)=(1.d0-exp(-2.d0*uhCos(:,i)))/(1.d0+exp(-2.d0*uhCos(:,i)))
-    end if
   end do
 
   allocate(AdmApdwSen(npts,1:n),AdmApdwCos(nptc,1:n),ImpApdwSen(npts,1:n),ImpApdwCos(nptc,1:n))
   allocate(RTEdwSen(npts,0:n),RTEdwCos(nptc,0:n),RTMdwSen(npts,0:n),RTMdwCos(nptc,0:n))
 
-  do i=n,1,-1
-    if (i==n) then
-    AdmApdwSen(:,i)=AdmIntSen(:,i)
-    AdmApdwCos(:,i)=AdmIntCos(:,i)
-    ImpApdwSen(:,i)=ImpIntSen(:,i)
-    ImpApdwCos(:,i)=ImpIntCos(:,i)
-    RTEdwSen(:,i)=(0.d0,0.d0)
-    RTEdwCos(:,i)=(0.d0,0.d0)
-    RTMdwSen(:,i)=(0.d0,0.d0)
-    RTMdwCos(:,i)=(0.d0,0.d0)
-    else
+  AdmApdwSen(:,n)=AdmIntSen(:,n)
+  AdmApdwCos(:,n)=AdmIntCos(:,n)
+  ImpApdwSen(:,n)=ImpIntSen(:,n)
+  ImpApdwCos(:,n)=ImpIntCos(:,n)
+  RTEdwSen(:,n)=(0.d0,0.d0)
+  RTEdwCos(:,n)=(0.d0,0.d0)
+  RTMdwSen(:,n)=(0.d0,0.d0)
+  RTMdwCos(:,n)=(0.d0,0.d0)
+  do i=n-1,1,-1
     AdmApdwSen(:,i)=AdmIntSen(:,i)*(AdmApdwSen(:,i+1)+AdmIntSen(:,i)* &
       tghSen(:,i))/(AdmIntSen(:,i)+AdmApdwSen(:,i+1)*tghSen(:,i))
     AdmApdwCos(:,i)=AdmIntCos(:,i)*(AdmApdwCos(:,i+1)+AdmIntCos(:,i)* &
@@ -836,27 +823,24 @@ contains
     RTEdwCos(:,i)=(AdmIntCos(:,i)-AdmApdwCos(:,i+1))/(AdmIntCos(:,i)+AdmApdwCos(:,i+1))
     RTMdwSen(:,i)=(ImpIntSen(:,i)-ImpApdwSen(:,i+1))/(ImpIntSen(:,i)+ImpApdwSen(:,i+1))
     RTMdwCos(:,i)=(ImpIntCos(:,i)-ImpApdwCos(:,i+1))/(ImpIntCos(:,i)+ImpApdwCos(:,i+1))
-    end if
   end do
-    RTEdwSen(:,0)=(AdmIntSen(:,0)-AdmApdwSen(:,1))/(AdmIntSen(:,0)+AdmApdwSen(:,1))
-    RTEdwCos(:,0)=(AdmIntCos(:,0)-AdmApdwCos(:,1))/(AdmIntCos(:,0)+AdmApdwCos(:,1))
-    RTMdwSen(:,0)=(ImpIntSen(:,0)-ImpApdwSen(:,1))/(ImpIntSen(:,0)+ImpApdwSen(:,1))
-    RTMdwCos(:,0)=(ImpIntCos(:,0)-ImpApdwCos(:,1))/(ImpIntCos(:,0)+ImpApdwCos(:,1))
+  RTEdwSen(:,0)=(AdmIntSen(:,0)-AdmApdwSen(:,1))/(AdmIntSen(:,0)+AdmApdwSen(:,1))
+  RTEdwCos(:,0)=(AdmIntCos(:,0)-AdmApdwCos(:,1))/(AdmIntCos(:,0)+AdmApdwCos(:,1))
+  RTMdwSen(:,0)=(ImpIntSen(:,0)-ImpApdwSen(:,1))/(ImpIntSen(:,0)+ImpApdwSen(:,1))
+  RTMdwCos(:,0)=(ImpIntCos(:,0)-ImpApdwCos(:,1))/(ImpIntCos(:,0)+ImpApdwCos(:,1))
 
   allocate(AdmApupSen(npts,0:n-1),AdmApupCos(nptc,0:n-1),ImpApupSen(npts,0:n-1),ImpApupCos(nptc,0:n-1))
   allocate(RTEupSen(npts,0:n),RTEupCos(nptc,0:n),RTMupSen(npts,0:n),RTMupCos(nptc,0:n))
 
-  do i=0,n-1
-    if (i==0) then
-    AdmApupSen(:,i)=AdmIntSen(:,i)
-    AdmApupCos(:,i)=AdmIntCos(:,i)
-    ImpApupSen(:,i)=ImpIntSen(:,i)
-    ImpApupCos(:,i)=ImpIntCos(:,i)
-    RTEupSen(:,i)=(0.d0,0.d0)
-    RTEupCos(:,i)=(0.d0,0.d0)
-    RTMupSen(:,i)=(0.d0,0.d0)
-    RTMupCos(:,i)=(0.d0,0.d0)
-    else
+  AdmApupSen(:,0)=AdmIntSen(:,0)
+  AdmApupCos(:,0)=AdmIntCos(:,0)
+  ImpApupSen(:,0)=ImpIntSen(:,0)
+  ImpApupCos(:,0)=ImpIntCos(:,0)
+  RTEupSen(:,0)=(0.d0,0.d0)
+  RTEupCos(:,0)=(0.d0,0.d0)
+  RTMupSen(:,0)=(0.d0,0.d0)
+  RTMupCos(:,0)=(0.d0,0.d0)
+  do i=1,n-1
     AdmApupSen(:,i)=AdmIntSen(:,i)*(AdmApupSen(:,i-1)+AdmIntSen(:,i)* &
       tghSen(:,i))/(AdmIntSen(:,i)+AdmApupSen(:,i-1)*tghSen(:,i))
     AdmApupCos(:,i)=AdmIntCos(:,i)*(AdmApupCos(:,i-1)+AdmIntCos(:,i)* &
@@ -869,12 +853,11 @@ contains
     RTEupCos(:,i)=(AdmIntCos(:,i)-AdmApupCos(:,i-1))/(AdmIntCos(:,i)+AdmApupCos(:,i-1))
     RTMupSen(:,i)=(ImpIntSen(:,i)-ImpApupSen(:,i-1))/(ImpIntSen(:,i)+ImpApupSen(:,i-1))
     RTMupCos(:,i)=(ImpIntCos(:,i)-ImpApupCos(:,i-1))/(ImpIntCos(:,i)+ImpApupCos(:,i-1))
-    end if
   end do
-    RTEupSen(:,n)=(AdmIntSen(:,n)-AdmApupSen(:,n-1))/(AdmIntSen(:,n)+AdmApupSen(:,n-1))
-    RTEupCos(:,n)=(AdmIntCos(:,n)-AdmApupCos(:,n-1))/(AdmIntCos(:,n)+AdmApupCos(:,n-1))
-    RTMupSen(:,n)=(ImpIntSen(:,n)-ImpApupSen(:,n-1))/(ImpIntSen(:,n)+ImpApupSen(:,n-1))
-    RTMupCos(:,n)=(ImpIntCos(:,n)-ImpApupCos(:,n-1))/(ImpIntCos(:,n)+ImpApupCos(:,n-1))
+  RTEupSen(:,n)=(AdmIntSen(:,n)-AdmApupSen(:,n-1))/(AdmIntSen(:,n)+AdmApupSen(:,n-1))
+  RTEupCos(:,n)=(AdmIntCos(:,n)-AdmApupCos(:,n-1))/(AdmIntCos(:,n)+AdmApupCos(:,n-1))
+  RTMupSen(:,n)=(ImpIntSen(:,n)-ImpApupSen(:,n-1))/(ImpIntSen(:,n)+ImpApupSen(:,n-1))
+  RTMupCos(:,n)=(ImpIntCos(:,n)-ImpApupCos(:,n-1))/(ImpIntCos(:,n)+ImpApupCos(:,n-1))
 
   allocate(AMdwSen(npts),AMdwCos(nptc),AMupSen(npts),AMupCos(nptc),FEdwSen(npts),FEdwCos(nptc),FEupSen(npts),FEupCos(nptc))
 
