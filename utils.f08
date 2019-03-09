@@ -11,7 +11,7 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
   integer :: i, j, k
 
   allocate( h(0:n), prof(-1:n) )
-  if ( size(esp) == n .and. n == 1 ) then
+  if ( n == 1 ) then  !if ( size(esp) == n .and. n == 1 ) then
     h(0)=0.d0
     h(n)=1.d300
   elseif (size(esp) == n) then

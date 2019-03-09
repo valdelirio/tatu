@@ -58,6 +58,7 @@ in = json_io_read_input(input_file)
 
 ! getting input parameters
 ncam = in%layers%number
+if ( ncam == 1 ) call clifor_write_warning('The thickness was ignored!')
 h = in%layers%thickness
 
 allocate(sigmas(ncam))
@@ -66,22 +67,34 @@ sigmas = 1.d0 / in%layers%resistivity
 !constructing array of transmitters:
 select case (in%transmitter%direction)
   case ('x')
-    nT = floor((in%transmitter%final - in%transmitter%initial%x) / in%transmitter%step) + 1
+    if ( dabs(in%transmitter%step) < eps ) then
+      nT = 1
+    else
+      nT = floor((in%transmitter%final - in%transmitter%initial%x) / in%transmitter%step) + 1
+    end if
     allocate(tmt(nT,3), mydirecT(nT))
     tmt(:,1) = in%transmitter%initial%x + (/(i,i=0,nT-1)/) * in%transmitter%step
     tmt(:,2) = in%transmitter%initial%y
     tmt(:,3) = in%transmitter%initial%z
     mydirecT = tmt(:,1)
   case ('y')
-    nT = floor((in%transmitter%final - in%transmitter%initial%y) / in%transmitter%step) + 1
+    if ( dabs(in%transmitter%step) < eps ) then
+      nT = 1
+    else
+      nT = floor((in%transmitter%final - in%transmitter%initial%y) / in%transmitter%step) + 1
+    end if
     allocate(tmt(nT,3), mydirecT(nT))
     tmt(:,1) = in%transmitter%initial%x
     tmt(:,2) = in%transmitter%initial%y + (/(i,i=0,nT-1)/) * in%transmitter%step
     tmt(:,3) = in%transmitter%initial%z
     mydirecT = tmt(:,2)
   case ('z')
-    nT = floor((in%transmitter%final - in%transmitter%initial%z) / in%transmitter%step) + 1
-  allocate(tmt(nT,3), mydirecT(nT))
+    if ( dabs(in%transmitter%step) < eps ) then
+      nT = 1
+    else
+      nT = floor((in%transmitter%final - in%transmitter%initial%z) / in%transmitter%step) + 1
+    end if
+    allocate(tmt(nT,3), mydirecT(nT))
     tmt(:,1) = in%transmitter%initial%x
     tmt(:,1) = in%transmitter%initial%y
     tmt(:,3) = in%transmitter%initial%z + (/(i,i=0,nT-1)/) * in%transmitter%step
@@ -94,21 +107,33 @@ end select
 !constructing array of receivers:
 select case (in%receiver%direction)
   case ('x')
-    nR = floor((in%receiver%final - in%receiver%initial%x) / in%receiver%step) + 1
+    if ( dabs(in%receiver%step) < eps ) then
+      nR = 1
+    else
+      nR = floor((in%receiver%final - in%receiver%initial%x) / in%receiver%step) + 1
+    end if
     allocate(rcv(nR,3), mydirecR(nR))
     rcv(:,1) = in%receiver%initial%x + (/(i,i=0,nR-1)/) * in%receiver%step
     rcv(:,2) = in%receiver%initial%y
     rcv(:,3) = in%receiver%initial%z
     mydirecR = rcv(:,1)
   case ('y')
-    nR = floor((in%receiver%final - in%receiver%initial%y) / in%receiver%step) + 1
-  allocate(rcv(nR,3), mydirecR(nR))
+    if ( dabs(in%receiver%step) < eps ) then
+      nR = 1
+    else
+      nR = floor((in%receiver%final - in%receiver%initial%y) / in%receiver%step) + 1
+    end if
+    allocate(rcv(nR,3), mydirecR(nR))
     rcv(:,1) = in%receiver%initial%x
     rcv(:,2) = in%receiver%initial%y + (/(i,i=0,nR-1)/) * in%receiver%step
     rcv(:,3) = in%receiver%initial%z
     mydirecR = rcv(:,2)
   case ('z')
-    nR = floor((in%receiver%final - in%receiver%initial%z) / in%receiver%step) + 1
+    if ( dabs(in%receiver%step) < eps ) then
+      nR = 1
+    else
+      nR = floor((in%receiver%final - in%receiver%initial%z) / in%receiver%step) + 1
+    end if
     allocate(rcv(nR,3), mydirecR(nR))
     rcv(:,1) = in%receiver%initial%x
     rcv(:,2) = in%receiver%initial%y
@@ -121,8 +146,13 @@ end select
 
 !constructing array of frequencies:
 allocate(freq(in%frequency%samples))
-pf = 10**( dlog10(in%frequency%final / in%frequency%initial) / (in%frequency%samples - 1) )
-freq = in%frequency%initial * pf ** (/(i, i=0, in%frequency%samples - 1)/)
+if (in%frequency%samples == 1 ) then
+  freq = in%frequency%initial
+  call clifor_write_warning('The final frequency was ignored!')
+else
+  pf = 10**( dlog10(in%frequency%final / in%frequency%initial) / (in%frequency%samples - 1) )
+  freq = in%frequency%initial * pf ** (/(i, i=0, in%frequency%samples - 1)/)
+end if
 ! allocates dimension of output file
 allocate(myout(nT*in%frequency%samples*nR,15))
 !
