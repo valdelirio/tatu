@@ -23,13 +23,13 @@ clifor.o = $(patsubst %, $(build)/%.o, $(clifor))
 # JSON_IO
 #--------------------------------------------------------------------
 # json-fortran dependencies from file
-include json_io/json-fortran/dependencies.make
-# json_io dependencies from file
-include json_io/dependencies.make
+include tatu_io/json-fortran/dependencies.make
+# tatu_io dependencies from file
+include tatu_io/dependencies.make
 # Adds build path and .o extension to each one of json-fortran dependencies
 json-fortran.o = $(patsubst %, $(build)/%.o, $(json-fortran))
 # Adds build path and .o extension to each one of json_io dependencies
-json_io.o = $(patsubst %, $(build)/%.o, $(json_io))
+tatu_io.o = $(patsubst %, $(build)/%.o, $(tatu_io))
 #--------------------------------------------------------------------
 
 # TATU
@@ -42,7 +42,7 @@ tatu.o = $(patsubst %, $(build)/%.o, $(tatu))
 
 
 # Target to create executable binary
-tatu: $(json_io.o) $(json-fortran.o) $(clifor.o) $(tatu.o)
+tatu: $(tatu_io.o) $(json-fortran.o) $(clifor.o) $(tatu.o)
 # $(@) represents the current target, in this case: $(@) = tatu
 # $(^) represents all dependencies of the current target, in this case: all .o files
 # -J specifies where to search for .mod files for compiled modules
@@ -52,10 +52,10 @@ tatu: $(json_io.o) $(json-fortran.o) $(clifor.o) $(tatu.o)
 $(build)/%.o: clifor/source/%.f08
 	$(MAKE) -C clifor
 
-# Runs the first target of Makefile in ./json_io/json_io directory
-# Compile json_io module and all its dependencies (json-fortran included)
-$(build)/%.o: json_io/source/%.f08
-	$(MAKE) -C json_io
+# Runs the first target of Makefile in ./tatu_io/tatu_io directory
+# Compile tatu_io module and all its dependencies (json-fortran included)
+$(build)/%.o: tatu_io/source/%.f08
+	$(MAKE) -C tatu_io
 
 $(build)/Anderson.o: Anderson.for
 	$(fc) -J$(build) -std=legacy -c $(<) -o $(@)

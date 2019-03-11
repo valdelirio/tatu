@@ -1,6 +1,6 @@
 program tatu
 use clifor
-use json_io
+use tatu_io
 use parameters
 use hmdx
 use hmdy
@@ -54,7 +54,7 @@ output_type = clifor_get_value_from_option('output-type')
 
 call clifor_finalizer
 
-in = json_io_read_input(input_file)
+in = tatu_io_read_input(input_file)
 
 ! getting input parameters
 ncam = in%layers%number
@@ -312,18 +312,18 @@ select case (in%transmitter%model)
 if ( output_type /= '' ) then
   select case (output_type)
     case ('json')
-      call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+      call tatu_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
     case ('ssv')
-      call json_io_write_output_ssv(output_file, labels, myout)
+      call tatu_io_write_output_ssv(output_file, labels, myout)
     case ('all')
-      call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
-      call json_io_write_output_ssv(output_file, labels, myout)
+      call tatu_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+      call tatu_io_write_output_ssv(output_file, labels, myout)
     case default
       call clifor_write_error('Invalid type. Use "json" or "ssv" only')
       stop
   end select
 else
-  call json_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+  call tatu_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
 end if
 
 call cpu_time(t2)
