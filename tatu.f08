@@ -184,7 +184,7 @@ select case (in%transmitter%model)
       do j = 1,in%frequency%samples
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(1.d-12,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           Rx = rcv(k,1)
@@ -206,7 +206,7 @@ select case (in%transmitter%model)
       do j = 1,in%frequency%samples
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(1.d-12,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           Rx = rcv(k,1)
@@ -228,7 +228,7 @@ select case (in%transmitter%model)
       do j = 1,in%frequency%samples
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(1.d-12,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           Rx = rcv(k,1)
@@ -250,7 +250,7 @@ select case (in%transmitter%model)
       do j = 1,in%frequency%samples
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(1.d-12,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           Rx = rcv(k,1)
@@ -272,7 +272,7 @@ select case (in%transmitter%model)
       do j = 1,in%frequency%samples
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(1.d-12,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           Rx = rcv(k,1)
@@ -294,7 +294,7 @@ select case (in%transmitter%model)
       do j = 1,in%frequency%samples
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(1.d-12,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           Rx = rcv(k,1)
@@ -312,18 +312,18 @@ select case (in%transmitter%model)
 if ( output_type /= '' ) then
   select case (output_type)
     case ('json')
-      call tatu_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+      call tatu_io_write_output_json(output_file, in, labels, myout, tmt, freq, rcv)
     case ('ssv')
-      call tatu_io_write_output_ssv(output_file, labels, myout)
+      call tatu_io_write_output_ssv(output_file, myout)
     case ('all')
-      call tatu_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
-      call tatu_io_write_output_ssv(output_file, labels, myout)
+      call tatu_io_write_output_json(output_file, in, labels, myout, tmt, freq, rcv)
+      call tatu_io_write_output_ssv(output_file, myout)
     case default
       call clifor_write_error('Invalid type. Use "json" or "ssv" only')
       stop
   end select
 else
-  call tatu_io_write_output(output_file, in, labels, myout, tmt, freq, rcv)
+  call tatu_io_write_output_json(output_file, in, labels, myout, tmt, freq, rcv)
 end if
 
 call cpu_time(t2)
