@@ -13,17 +13,17 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
   allocate( h(0:n), prof(-1:n) )
   if ( n == 1 ) then  !if ( size(esp) == n .and. n == 1 ) then
     h(0)=0.d0
-    h(n)=1.d300
+    h(n)=1.d6
   elseif (size(esp) == n) then
     h(0)=0.d0
     h(1:n)=esp
   else
     h(0)=0.d0
     h(1:n-1)=esp
-    h(n)=1.d300
+    h(n)=1.d6
   end if
   ! create depths array that suits any pathological situation
-  prof(-1)=-1.d300
+  prof(-1)=-1.d6
   prof(0)=0.d0
   if (n > 1) then
     prof(1) = h(1)
@@ -33,7 +33,7 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
       end do
     end if
   end if
-  prof(n)=1.d300
+  prof(n)=1.d6
 
   ! find the layer where the receiver is
   camad = 0
@@ -57,12 +57,12 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
   else if (h0 >= prof(n-1)) then
     camadT = n
   else
-  do j=n-1,1,-1
-  if (h0 >= prof(j-1)) then
-    camadT = j
-    exit
-  end if
-  end do
+    do j=n-1,1,-1
+      if (h0 >= prof(j-1)) then
+        camadT = j
+        exit
+      end if
+    end do
   end if
 end subroutine sanitizedata
 end module utils
