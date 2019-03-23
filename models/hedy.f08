@@ -55,20 +55,20 @@ contains
   allocate( TMdwJ0(1,1), TMdwJ1(1,1), TEdwJ0(1,1), TEdwJ1(1,1) )
   allocate( TMupJ0(1,1), TMupJ1(1,1), TEupJ0(1,1), TEupJ1(1,1) )
 
-!!  write(*,*)'Entre com o criador dos filtros J0: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3) ou Key(4)'
+!!  write(*,*)'Entre com o criador dos filtros J0: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3), Key(4) ou Werthmüller (5)'
 !!  read(*,*)idtfcd_cJ0
   filtro=0  !esta variável direciona o uso de filtros J0 e J1 em vez de seno e cosseno
 !!  call identfiltro(filtro,idtfcd_cJ0,ident_fJ0,nJ0)
-!!  write(*,*)'Entre com o criador dos filtros J1: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3) ou Key(4)'
+!!  write(*,*)'Entre com o criador dos filtros J1: Rijo(0), Frayzer(1), Guptasarma(2), Kong(3), Key(4) ou Werthmüller (5)'
 !!  read(*,*)idtfcd_cJ1
 !!  call identfiltro(filtro,idtfcd_cJ1,ident_fJ1,nJ1)
 
-  idtfcd_cJ0 = 5 !3
+  idtfcd_cJ0 = 3 !5 !
   ident_fJ0 = 0
-  nJ0 = 201  !241
-  idtfcd_cJ1 = 5 !3
+  nJ0 = 241 !201  !
+  idtfcd_cJ1 = 3 !5 !
   ident_fJ1 = 1
-  nJ1 = 201  !241
+  nJ1 = 241 !201  !
 
   allocate(KrJ0(nJ0),KrJ1(nJ1),w_J0(nJ0),w_J1(nJ1))
 
