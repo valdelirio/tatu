@@ -34,7 +34,8 @@ call clifor_create_option('i', 'input-file', 'File to read the input data', &
                               required=.true., need_value=.true., value_name='FILEPATH')
 call clifor_create_option('o', 'output-file', 'File to write the output data', &
                               required=.true., need_value=.true., value_name='FILEPATH')
-call clifor_create_option('t', 'output-type', 'Output file type: json (default) or ssv', need_value=.true., value_name='FILETYPE')
+call clifor_create_option('t', 'output-type', 'Output file type: json (default), ssv or all', &
+need_value=.true., value_name='FILETYPE')
 
 call clifor_read_command_line
 

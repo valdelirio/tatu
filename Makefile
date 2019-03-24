@@ -1,13 +1,12 @@
 # Build directory path, where to put .o and .mod
 build = ./build
 # Fortran Compiler
-fc = gfortran
+fc = gfortran -J$(build) -std=f2008
 # Flags to Fortran Compiler
 # -J specifies where to put .mod files for compiled modules
-development_flags = -J$(build) -std=f2008 -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -fmax-errors=1 -g -fcheck=all -fbacktrace
-production_flags  = -J$(build) -std=f2008 -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -Werror \
+development_flags = -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -fmax-errors=1 -g -fcheck=all -fbacktrace
+production_flags  = -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -Werror \
  -fmax-errors=1 -O3 -march=native -ffast-math -funroll-loops -static-libgfortran
-flags = $(development_flags)
 
 # If not exist, create build directory
 $(shell mkdir -p $(build))
@@ -40,6 +39,15 @@ include ./dependencies.make
 tatu.o = $(patsubst %, $(build)/%.o, $(tatu))
 #--------------------------------------------------------------------
 
+# GNU Make Target-specific Variable Values
+development: flags = $(development_flags)
+production: flags = $(production_flags)
+
+# Development target (default)
+development: tatu
+
+# Production target
+production: tatu
 
 # Target to create executable binary
 tatu: $(tatu_io.o) $(json-fortran.o) $(clifor.o) $(tatu.o)
@@ -58,7 +66,7 @@ $(build)/%.o: tatu_io/source/%.f08
 	$(MAKE) -C tatu_io
 
 $(build)/Anderson.o: Anderson.for
-	$(fc) -J$(build) -std=legacy -c $(<) -o $(@)
+	$(fc) -std=legacy -c $(<) -o $(@)
 
 $(build)/%.o: %.f08
 # $(<) represents the first dependency of the current target, in this case: $(<) = %.f08
