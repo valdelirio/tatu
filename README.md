@@ -1,6 +1,6 @@
 # Tatu Software
 
-Geophysics Electromagnetic Modeling in 1D Layered Media
+Geophysics Electromagnetic Modeling in 1D Layered Media (<a target="blank" href="https://tatusoftware.com">https://tatusoftware.com</a>)
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ $ make production
 
 ## How to use
 
-To simulate your models you'll need an input file in [JSON (JavaScript Object Notation)](https://json.org) format. The code below shows an example input file (`input.json`) with all required keys:
+To simulate your models you'll need an input file in <a target="blank" href="https://json.org">JSON (JavaScript Object Notation)</a> format. The code below shows an example input file (`input.json`) with all required keys:
 
 ```json
 {
