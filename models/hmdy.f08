@@ -287,7 +287,6 @@ subroutine hmdy_xyz_loops( Tx, Ty, h0, n, esp, condut, neta, zeta, cx, cy, z, Ex
     end do
   else
     deallocate( TMdwJ0, TMdwJ1, TEdwJ0, TEdwJ1)
-    deallocate( TMdwJ0, TMupJ1, TEupJ0, TEupJ1)
     allocate( TMdwJ0(nJ0,camadT : camad), TMdwJ1(nJ1,camadT : camad), TEdwJ0(nJ0,camadT : camad), TEdwJ1(nJ1,camadT : camad) )
     allocate( TMupJ0(nJ0,camad : camadT), TMupJ1(nJ1,camad : camadT), TEupJ0(nJ0,camad : camadT), TEupJ1(nJ1,camad : camadT) )
 
