@@ -11,19 +11,16 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
   integer :: i, j, k
 
   allocate( h(0:n), prof(-1:n) )
-  if ( n == 1 ) then  !if ( size(esp) == n .and. n == 1 ) then
-    h(0)=0.d0
-    h(n)=1.d6
-  elseif (size(esp) == n) then
+  if (size(esp) == n) then
     h(0)=0.d0
     h(1:n)=esp
   else
     h(0)=0.d0
     h(1:n-1)=esp
-    h(n)=1.d6
+    h(n)=1.d300
   end if
   ! create depths array that suits any pathological situation
-  prof(-1)=-1.d6
+  prof(-1)=-1.d300
   prof(0)=0.d0
   if (n > 1) then
     prof(1) = h(1)
@@ -33,7 +30,7 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
       end do
     end if
   end if
-  prof(n)=1.d6
+  prof(n)=1.d300
 
   ! find the layer where the receiver is
   camad = 0
@@ -65,4 +62,15 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
     end do
   end if
 end subroutine sanitizedata
+
+function int2str(num)
+implicit none
+integer, intent(in) :: num
+character(len=8) :: int2str
+
+write(int2str,'(I8)')num
+
+return
+end function int2str
+
 end module utils
