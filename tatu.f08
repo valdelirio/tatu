@@ -198,7 +198,7 @@ select case (in%transmitter%model)
         iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp)  !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
@@ -252,7 +252,7 @@ select case (in%transmitter%model)
         iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(0,1,kind=dp) * w * epsilon  !cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,w * epsilon,kind=dp) !
+        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,w * epsilon,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
@@ -369,6 +369,6 @@ else
 end if
 
 call cpu_time(t2)
-write(*,*) t2-t1
+write(*,*) achar(13)//achar(11)//achar(0), '[ TIME ]',t2-t1
 
 end program tatu
