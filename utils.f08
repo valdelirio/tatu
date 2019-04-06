@@ -66,9 +66,9 @@ end subroutine sanitizedata
 function int2str(num)
 implicit none
 integer, intent(in) :: num
-character(len=8) :: int2str
+character(len=16) :: int2str
 
-write(int2str,'(I8)')num
+write(int2str,'(I16)')num
 
 return
 end function int2str

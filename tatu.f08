@@ -24,8 +24,8 @@ type(json_input) :: in
 character(len=31) :: Ttext
 character(len=12) :: Ftext
 character(len=11) :: Rtext
-character(len=8) :: Ttot, Ftot, Rtot, iterT, iterF, iterR
-character(len=80) :: info
+character(len=16) :: Ttot, Ftot, Rtot, iterT, iterF, iterR
+character(len=128) :: info
 
 call cpu_time(start)
 
@@ -35,7 +35,7 @@ Rtext = '; Receptor '
 
 call clifor_set_program_info( &
   name='tatu', &
-  version='0.2.0', &
+  version='0.2.1', &
   pretty_name='Tatu', &
   description='Geophysics Electromagnetic Modeling in 1D Layered Media' &
 )
