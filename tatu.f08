@@ -10,7 +10,7 @@ use hedy
 use ved
 implicit none
 integer :: ncam, nT, nR, i, j, k, p
-real(sp) :: unused(2), elapsed_time
+real(sp) :: start, finish
 real(dp) :: pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
 real(dp), dimension(:), allocatable :: sigmas, h, freq, mydirecT, mydirecR
 real(dp), dimension(:,:), allocatable :: tmt, rcv, myout
@@ -25,6 +25,8 @@ character(len=12) :: Ftext
 character(len=11) :: Rtext
 character(len=8) :: Ttot, Ftot, Rtot, iterT, iterF, iterR
 character(len=80) :: info
+
+call cpu_time(start)
 
 Ttext = 'Fields processing: Transmitter '
 Ftext = '; Frequency '
@@ -367,7 +369,7 @@ else
   call tatu_io_write_output_json(output_file, in, labels, myout, tmt, freq, rcv)
 end if
 
-call etime(unused, elapsed_time)
-write(*,*) achar(13)//achar(11)//achar(0), '[ TIME ] ',elapsed_time
+call cpu_time(finish)
+write(*,*) achar(13)//achar(11)//achar(0), '[ TIME ]', finish-start
 
 end program tatu

@@ -1,7 +1,7 @@
 # Build directory path, where to put .o and .mod
 build = ./build
 # Fortran Compiler
-fc = gfortran -J$(build) -std=f2008 -fall-intrinsics
+fc = gfortran -J$(build) -std=f2008
 # Flags to Fortran Compiler
 # -J specifies where to put .mod files for compiled modules
 development_flags = -pedantic -Wall -Wextra -Wimplicit-interface -fPIC -fmax-errors=1 -g -fcheck=all -fbacktrace
