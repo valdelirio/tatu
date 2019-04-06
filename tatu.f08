@@ -9,6 +9,7 @@ use hedx
 use hedy
 use ved
 implicit none
+logical :: progress
 integer :: ncam, nT, nR, i, j, k, p
 real(sp) :: start, finish
 real(dp) :: pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
@@ -34,7 +35,7 @@ Rtext = '; Receptor '
 
 call clifor_set_program_info( &
   name='tatu', &
-  version='0.1.0', &
+  version='0.2.0', &
   pretty_name='Tatu', &
   description='Geophysics Electromagnetic Modeling in 1D Layered Media' &
 )
@@ -46,7 +47,8 @@ call clifor_create_option('i', 'input-file', 'File to read the input data', &
 call clifor_create_option('o', 'output-file', 'File to write the output data', &
                               required=.true., need_value=.true., value_name='FILEPATH')
 call clifor_create_option('t', 'output-type', 'Output file type: json (default), ssv or all', &
-need_value=.true., value_name='FILETYPE')
+                              need_value=.true., value_name='FILETYPE')
+call clifor_create_option('p', 'progress', 'Show progress')
 
 call clifor_read_command_line
 
@@ -63,6 +65,8 @@ output_file = clifor_get_value_from_option('output-file')
 
 allocate(character(1) :: output_type)
 output_type = clifor_get_value_from_option('output-type')
+
+progress = clifor_flag_was_provided('progress')
 
 call clifor_finalizer
 
@@ -204,7 +208,7 @@ select case (in%transmitter%model)
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          call clifor_write_progress(info)
+          if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
@@ -231,7 +235,7 @@ select case (in%transmitter%model)
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          call clifor_write_progress(info)
+          if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
@@ -258,7 +262,7 @@ select case (in%transmitter%model)
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          call clifor_write_progress(info)
+          if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
@@ -285,7 +289,7 @@ select case (in%transmitter%model)
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          call clifor_write_progress(info)
+          if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
@@ -312,7 +316,7 @@ select case (in%transmitter%model)
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          call clifor_write_progress(info)
+          if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
@@ -339,7 +343,7 @@ select case (in%transmitter%model)
         do k = 1,nR
           iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          call clifor_write_progress(info)
+          if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
