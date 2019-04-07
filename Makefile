@@ -65,15 +65,15 @@ $(build)/%.o: clifor/source/%.f08
 $(build)/%.o: tatu_io/source/%.f08
 	$(MAKE) -C tatu_io
 
-$(build)/Anderson.o: Anderson.for
+$(build)/Anderson.o: source/Anderson.for
 	$(fc) -std=legacy -c $(<) -o $(@)
 
-$(build)/%.o: %.f08
+$(build)/%.o: source/%.f08
 # $(<) represents the first dependency of the current target, in this case: $(<) = %.f08
 	$(fc) $(flags) -c $(<) -o $(@)
 
 # Compile files inside models subdirectory
-$(build)/%.o: models/%.f08
+$(build)/%.o: source/models/%.f08
 	$(fc) $(flags) -c $(<) -o $(@)
 
 clean:
