@@ -4,6 +4,8 @@
 build/
 data/
 tatu
+*.dSYM
+*.bin
 
 # Prerequisites
 *.d
