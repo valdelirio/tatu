@@ -64,13 +64,35 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 end subroutine sanitizedata
 
 function int2str(num)
-implicit none
-integer, intent(in) :: num
-character(len=16) :: int2str
-
-write(int2str,'(I16)')num
-
-return
+  implicit none
+  integer, intent(in) :: num
+  character(len=16) :: int2str
+  write(int2str, '(i16)') num
 end function int2str
+
+function real2str(real, format)
+  implicit none
+  real(sp), intent(in) :: real
+  character(len=*), intent(in), optional :: format
+  character(len=16) :: real2str
+  if (present(format)) then
+    write(real2str, format) real
+  else
+    write(real2str, '(f6.2)') real
+  end if
+end function real2str
+
+function real2strPerc(real)
+  implicit none
+  real(sp), intent(in) :: real
+  character(len=3) :: real2strPerc
+  integer :: percentage
+  if (real > 99.1 .and. real < 100.9) then
+    percentage = 100
+  else
+    percentage = int(real)
+  end if
+  write(real2strPerc, '(i3)') percentage
+end function real2strPerc
 
 end module utils

@@ -21,23 +21,25 @@ character(len=:), allocatable :: input_file, output_file, output_type
 character(len=20), dimension(15) :: labels
 type(json_input) :: in
 
-character(len=31) :: Ttext
+character(len=15) :: Ttext
 character(len=12) :: Ftext
 character(len=11) :: Rtext
 character(len=16) :: Ttot, Ftot, Rtot
 integer :: ilenTtot, ilenFtot, ilenRtot
 character(len=:), allocatable :: iterT, iterF, iterR, clenTtot, clenFtot, clenRtot
 character(len=128) :: info
+real(sp) :: rPerc, incPerc
+character(len=3) :: cPerc
 
 call cpu_time(start)
 
-Ttext = 'Fields processing: Transmitter '
+Ttext = '%: Transmitter '
 Ftext = '; Frequency '
 Rtext = '; Receptor '
 
 call clifor_set_program_info( &
   name='tatu', &
-  version='0.2.1', &
+  version='0.2.2', &
   pretty_name='Tatu', &
   description='Geophysics Electromagnetic Modeling in 1D Layered Media' &
 )
@@ -205,6 +207,8 @@ labels(14) = 'HzReal'
 labels(15) = 'HzImag'
 
 !selects source and determines eletromagnetic fields in receivers positions
+rPerc = 0
+incPerc = 100.0/nT/in%frequency%samples/nR
 select case (in%transmitter%model)
   case ('hedx')
     p = 1
@@ -221,14 +225,16 @@ select case (in%transmitter%model)
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
-          info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          if (progress) call clifor_write_progress(info)
+          rPerc = rPerc + incPerc
+          write(cPerc, '(a3)') trim(adjustl(real2strPerc(rPerc)))
+          info = cPerc//Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.'
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call hedx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+          if (progress) call clifor_write_progress(info)
           p = p + 1
         end do
       end do
@@ -248,14 +254,16 @@ select case (in%transmitter%model)
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
-          info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          if (progress) call clifor_write_progress(info)
+          rPerc = rPerc + incPerc
+          write(cPerc, '(a3)') trim(adjustl(real2strPerc(rPerc)))
+          info = cPerc//Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.'
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call hedy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+          if (progress) call clifor_write_progress(info)
           p = p + 1
         end do
       end do
@@ -275,14 +283,16 @@ select case (in%transmitter%model)
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
-          info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          if (progress) call clifor_write_progress(info)
+          rPerc = rPerc + incPerc
+          write(cPerc, '(a3)') trim(adjustl(real2strPerc(rPerc)))
+          info = cPerc//Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.'
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call ved_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+          if (progress) call clifor_write_progress(info)
           p = p + 1
         end do
       end do
@@ -302,14 +312,16 @@ select case (in%transmitter%model)
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
-          info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          if (progress) call clifor_write_progress(info)
+          rPerc = rPerc + incPerc
+          write(cPerc, '(a3)') trim(adjustl(real2strPerc(rPerc)))
+          info = cPerc//Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.'
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call hmdx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+          if (progress) call clifor_write_progress(info)
           p = p + 1
         end do
       end do
@@ -329,14 +341,16 @@ select case (in%transmitter%model)
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
-          info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          if (progress) call clifor_write_progress(info)
+          rPerc = rPerc + incPerc
+          write(cPerc, '(a3)') trim(adjustl(real2strPerc(rPerc)))
+          info = cPerc//Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.'
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call hmdy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+          if (progress) call clifor_write_progress(info)
           p = p + 1
         end do
       end do
@@ -356,14 +370,16 @@ select case (in%transmitter%model)
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
-          info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
-          if (progress) call clifor_write_progress(info)
+          rPerc = rPerc + incPerc
+          write(cPerc, '(a3)') trim(adjustl(real2strPerc(rPerc)))
+          info = cPerc//Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.'
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
           call vmd_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Hxp,Hyp,Hzp)
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+          if (progress) call clifor_write_progress(info)
           p = p + 1
         end do
       end do
