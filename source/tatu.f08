@@ -24,7 +24,9 @@ type(json_input) :: in
 character(len=31) :: Ttext
 character(len=12) :: Ftext
 character(len=11) :: Rtext
-character(len=16) :: Ttot, Ftot, Rtot, iterT, iterF, iterR
+character(len=16) :: Ttot, Ftot, Rtot
+integer :: ilenTtot, ilenFtot, ilenRtot
+character(len=:), allocatable :: iterT, iterF, iterR, clenTtot, clenFtot, clenRtot
 character(len=128) :: info
 
 call cpu_time(start)
@@ -120,6 +122,10 @@ select case (in%transmitter%direction)
     stop 1
 end select
 Ttot = int2str(nT)
+ilenTtot = len(trim(adjustl(Ttot)))
+allocate(character(len=1) :: clenTtot)
+clenTtot = trim(adjustl(int2str(ilenTtot)))
+allocate(character(len=2*ilenTtot+1) :: iterT)
 !constructing array of receivers:
 select case (in%receiver%direction)
   case ('x')
@@ -160,6 +166,10 @@ select case (in%receiver%direction)
     stop 1
 end select
 Rtot = int2str(nR)
+ilenRtot = len(trim(adjustl(Rtot)))
+allocate(character(len=1) :: clenRtot)
+clenRtot = trim(adjustl(int2str(ilenRtot)))
+allocate(character(len=2*ilenRtot+1) :: iterR)
 !constructing array of frequencies:
 allocate(freq(in%frequency%samples))
 if (in%frequency%samples == 1 ) then
@@ -170,6 +180,10 @@ else
   freq = in%frequency%initial * pf ** (/(i, i=0, in%frequency%samples - 1)/)
 end if
 Ftot = int2str(in%frequency%samples)
+ilenFtot = len(trim(adjustl(Ftot)))
+allocate(character(len=1) :: clenFtot)
+clenFtot = trim(adjustl(int2str(ilenFtot)))
+allocate(character(len=2*ilenFtot+1) :: iterF)
 ! allocates dimension of output file
 allocate(myout(nT*in%frequency%samples*nR,15))
 !
@@ -195,18 +209,18 @@ select case (in%transmitter%model)
   case ('hedx')
     p = 1
     do i = 1,nT
-      iterT = trim(adjustl(int2str(i)))//'/'//trim(adjustl(Ttot))
+      write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
       Tx = tmt(i,1)
       Ty = tmt(i,2)
       Tz = tmt(i,3)
       do j = 1,in%frequency%samples
-        iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
+        write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
         eta0 = cmplx(5.d-15,0.d0,kind=dp)  !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
-          iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
+          write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
           if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
@@ -222,18 +236,18 @@ select case (in%transmitter%model)
   case ('hedy')
     p = 1
     do i = 1,nT
-      iterT = trim(adjustl(int2str(i)))//'/'//trim(adjustl(Ttot))
+      write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
       Tx = tmt(i,1)
       Ty = tmt(i,2)
       Tz = tmt(i,3)
       do j = 1,in%frequency%samples
-        iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
+        write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
         eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
-          iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
+          write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
           if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
@@ -249,18 +263,18 @@ select case (in%transmitter%model)
   case ('ved')
     p = 1
     do i = 1,nT
-      iterT = trim(adjustl(int2str(i)))//'/'//trim(adjustl(Ttot))
+      write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
       Tx = tmt(i,1)
       Ty = tmt(i,2)
       Tz = tmt(i,3)
       do j = 1,in%frequency%samples
-        iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
+        write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
         eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,w * epsilon,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
-          iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
+          write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
           if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
@@ -276,18 +290,18 @@ select case (in%transmitter%model)
   case ('hmdx')
     p = 1
     do i = 1,nT
-      iterT = trim(adjustl(int2str(i)))//'/'//trim(adjustl(Ttot))
+      write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
       Tx = tmt(i,1)
       Ty = tmt(i,2)
       Tz = tmt(i,3)
       do j = 1,in%frequency%samples
-        iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
+        write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
         eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
-          iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
+          write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
           if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
@@ -303,18 +317,18 @@ select case (in%transmitter%model)
   case ('hmdy')
     p = 1
     do i = 1,nT
-      iterT = trim(adjustl(int2str(i)))//'/'//trim(adjustl(Ttot))
+      write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
       Tx = tmt(i,1)
       Ty = tmt(i,2)
       Tz = tmt(i,3)
       do j = 1,in%frequency%samples
-        iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
+        write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
         eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
-          iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
+          write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
           if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
@@ -330,18 +344,18 @@ select case (in%transmitter%model)
   case ('vmd')
     p = 1
     do i = 1,nT
-      iterT = trim(adjustl(int2str(i)))//'/'//trim(adjustl(Ttot))
+      write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
       Tx = tmt(i,1)
       Ty = tmt(i,2)
       Tz = tmt(i,3)
       do j = 1,in%frequency%samples
-        iterF = trim(adjustl(int2str(j)))//'/'//trim(adjustl(Ftot))
+        write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
         eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
         zeta = cmplx(0,1,kind=dp) * w * mu
         do k = 1,nR
-          iterR = trim(adjustl(int2str(k)))//'/'//trim(adjustl(Rtot))
+          write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           info = adjustl(Ttext//trim(iterT)//Ftext//trim(iterF)//Rtext//trim(iterR)//'.')
           if (progress) call clifor_write_progress(info)
           Rx = rcv(k,1)
