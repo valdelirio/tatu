@@ -86,13 +86,7 @@ function real2strPerc(real)
   implicit none
   real(sp), intent(in) :: real
   character(len=3) :: real2strPerc
-  integer :: percentage
-  if (real > 99.1 .and. real < 100.9) then
-    percentage = 100
-  else
-    percentage = int(real)
-  end if
-  write(real2strPerc, '(i3)') percentage
+  write(real2strPerc, '(i3)') nint(real)
 end function real2strPerc
 
 end module utils
