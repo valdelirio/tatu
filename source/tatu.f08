@@ -2,6 +2,8 @@ program tatu
 use clifor
 use tatu_io
 use parameters
+use filterscommonbase
+use utils
 use hmdx
 use hmdy
 use vmd
@@ -10,12 +12,16 @@ use hedy
 use ved
 implicit none
 logical :: progress
-integer :: ncam, nT, nR, i, j, k, p
+integer :: ncam, nT, nR, i, j, k, p, npt, camadT, camadR
 real(sp) :: start, finish
-real(dp) :: pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w
-real(dp), dimension(:), allocatable :: sigmas, h, freq, mydirecT, mydirecR
+real(dp) :: pf, Tx, Ty, Tz, f, Rx, Ry, Rz, w, r
+real(dp), dimension(:), allocatable :: sigmas, esp, freq, mydirecT, mydirecR
+real(dp), dimension(:), allocatable :: krJ0J1, wJ0, wJ1, h, prof
 real(dp), dimension(:,:), allocatable :: tmt, rcv, myout
 complex(dp) :: eta0, zeta, Exp, Eyp, Ezp, Hxp, Hyp, Hzp
+complex(dp), dimension(:), allocatable :: eta, AMdw, AMup, FEdw, FEup
+complex(dp), dimension(:), allocatable :: AMdwz, AMupz, FEdwz, FEupz
+complex(dp), dimension(:,:), allocatable :: u, AdmInt, ImpInt, uh, RTEdw, RTMdw, RTEup, RTMup
 
 character(len=:), allocatable :: input_file, output_file, output_type
 character(len=20), dimension(15) :: labels
@@ -39,7 +45,7 @@ Rtext = '; Receptor '
 
 call clifor_set_program_info( &
   name='tatu', &
-  version='0.2.2', &
+  version='1.0.0', &
   pretty_name='Tatu', &
   description='Geophysics Electromagnetic Modeling in 1D Layered Media' &
 )
@@ -79,9 +85,9 @@ in = tatu_io_read_input(input_file)
 ! getting input parameters
 ncam = in%layers%number
 if ( ncam == 1 ) call clifor_write_warning('The thickness was ignored!')
-h = in%layers%thickness
+esp = in%layers%thickness
 
-allocate(sigmas(ncam))
+allocate(sigmas(ncam), eta(ncam))
 sigmas = 1.d0 / in%layers%resistivity
 
 !constructing array of transmitters:
@@ -205,6 +211,13 @@ labels(12) = 'HyReal'
 labels(13) = 'HyImag'
 labels(14) = 'HzReal'
 labels(15) = 'HzImag'
+! Werthmüller's filters:
+npt = 201
+call J0J1Wer(npt, krJ0J1, wJ0, wJ1)
+! Alocating common arrays to any dipole:
+allocate(FEdw(npt), FEup(npt), AMdw(npt), AMup(npt))
+allocate(u(npt,0:ncam), uh(npt,0:ncam), AdmInt(npt,0:ncam), ImpInt(npt,0:ncam))
+allocate(RTEdw(npt,0:ncam), RTEup(npt,0:ncam), RTMdw(npt,0:ncam), RTMup(npt,0:ncam))
 
 !selects source and determines eletromagnetic fields in receivers positions
 rPerc = 0
@@ -221,8 +234,9 @@ select case (in%transmitter%model)
         write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp)  !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(1.d-12,w*epsilon,kind=dp)
         zeta = cmplx(0,1,kind=dp) * w * mu
+        eta = cmplx(sigmas,w*epsilon,kind=dp)
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           rPerc = rPerc + incPerc
@@ -231,7 +245,15 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call hedx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          ! Calculating fields of hedx in most optimized manner:
+          call sanitizedata(ncam,Tz,Rz,esp,camadT,camadR,h,prof)
+          r = sqrt((Rx - Tx)**2 + (Ry - Ty)**2)
+          call commonarraysED(ncam,npt,r,krJ0J1,zeta,eta0,Tz,h,prof,camadT,eta, &
+                 u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw,RTMup,FEdw,FEup,AMdw,AMup)
+          call hedx_optimized(Tx,Ty,Tz,ncam,camadR,camadT,npt,krJ0J1,wJ0,wJ1,h, &
+                 prof,eta,zeta,eta0,Rx,Ry,Rz,u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw, &
+                 RTMup,FEdw,FEup,AMdw,AMup,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           if (progress) call clifor_write_progress(info)
@@ -250,8 +272,9 @@ select case (in%transmitter%model)
         write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(1.d-12,w*epsilon,kind=dp)
         zeta = cmplx(0,1,kind=dp) * w * mu
+        eta = cmplx(sigmas,w*epsilon,kind=dp)
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           rPerc = rPerc + incPerc
@@ -260,7 +283,15 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call hedy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          ! Calculating fields of hedy in most optimized manner:
+          call sanitizedata(ncam,Tz,Rz,esp,camadT,camadR,h,prof)
+          r = sqrt((Rx - Tx)**2 + (Ry - Ty)**2)
+          call commonarraysED(ncam,npt,r,krJ0J1,zeta,eta0,Tz,h,prof,camadT,eta, &
+                 u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw,RTMup,FEdw,FEup,AMdw,AMup)
+          call hedy_optimized(Tx,Ty,Tz,ncam,camadR,camadT,npt,krJ0J1,wJ0,wJ1,h, &
+                 prof,eta,zeta,eta0,Rx,Ry,Rz,u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw, &
+                 RTMup,FEdw,FEup,AMdw,AMup,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           if (progress) call clifor_write_progress(info)
@@ -269,6 +300,7 @@ select case (in%transmitter%model)
       end do
     end do
   case ('ved')
+    allocate(AMdwz(npt),AMupz(npt))
     p = 1
     do i = 1,nT
       write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
@@ -279,8 +311,9 @@ select case (in%transmitter%model)
         write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,w * epsilon,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(1.d-12,w*epsilon,kind=dp)
         zeta = cmplx(0,1,kind=dp) * w * mu
+        eta = cmplx(sigmas,w*epsilon,kind=dp)
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           rPerc = rPerc + incPerc
@@ -289,7 +322,15 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call ved_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          ! Calculating fields of ved in most optimized manner:
+          call sanitizedata(ncam,Tz,Rz,esp,camadT,camadR,h,prof)
+          r = sqrt((Rx - Tx)**2 + (Ry - Ty)**2)
+          call commonarraysED(ncam,npt,r,krJ0J1,zeta,eta0,Tz,h,prof,camadT,eta, &
+                 u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw,RTMup,FEdw,FEup,AMdw,AMup,AMdwz,AMupz)
+          call ved_optimized(Tx,Ty,Tz,ncam,camadR,camadT,npt,krJ0J1,wJ0,wJ1,h, &
+                 prof,eta,eta0,Rx,Ry,Rz,u,uh,ImpInt,RTMdw,RTMup,AMdwz,AMupz, &
+                 Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           if (progress) call clifor_write_progress(info)
@@ -308,8 +349,9 @@ select case (in%transmitter%model)
         write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(1.d-12,w*epsilon,kind=dp)
         zeta = cmplx(0,1,kind=dp) * w * mu
+        eta = cmplx(sigmas,w*epsilon,kind=dp)
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           rPerc = rPerc + incPerc
@@ -318,7 +360,15 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call hmdx_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          ! Calculating fields of hmdx in most optimized manner:
+          call sanitizedata(ncam,Tz,Rz,esp,camadT,camadR,h,prof)
+          r = sqrt((Rx - Tx)**2 + (Ry - Ty)**2)
+          call commonarraysMD(ncam,npt,r,krJ0J1,zeta,eta0,Tz,h,prof,camadT,eta, &
+                 u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw,RTMup,FEdw,FEup,AMdw,AMup)
+          call hmdx_optimized(Tx,Ty,Tz,ncam,camadR,camadT,npt,krJ0J1,wJ0,wJ1,h, &
+                 prof,eta,zeta,eta0,Rx,Ry,Rz,u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw, &
+                 RTMup,FEdw,FEup,AMdw,AMup,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           if (progress) call clifor_write_progress(info)
@@ -337,8 +387,9 @@ select case (in%transmitter%model)
         write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(1.d-12,w*epsilon,kind=dp)
         zeta = cmplx(0,1,kind=dp) * w * mu
+        eta = cmplx(sigmas,w*epsilon,kind=dp)
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           rPerc = rPerc + incPerc
@@ -347,7 +398,15 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call hmdy_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+          ! Calculating fields of hmdy in most optimized manner:
+          call sanitizedata(ncam,Tz,Rz,esp,camadT,camadR,h,prof)
+          r = sqrt((Rx - Tx)**2 + (Ry - Ty)**2)
+          call commonarraysMD(ncam,npt,r,krJ0J1,zeta,eta0,Tz,h,prof,camadT,eta, &
+                 u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw,RTMup,FEdw,FEup,AMdw,AMup)
+          call hmdy_optimized(Tx,Ty,Tz,ncam,camadR,camadT,npt,krJ0J1,wJ0,wJ1,h, &
+                 prof,eta,zeta,eta0,Rx,Ry,Rz,u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw, &
+                 RTMup,FEdw,FEup,AMdw,AMup,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
                         real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
           if (progress) call clifor_write_progress(info)
@@ -356,6 +415,7 @@ select case (in%transmitter%model)
       end do
     end do
   case ('vmd')
+    allocate(FEdwz(npt), FEupz(npt))
     p = 1
     do i = 1,nT
       write(iterT, '(a'//clenTtot//',a)') trim(adjustl(int2str(i))), '/'//trim(adjustl(Ttot))
@@ -366,8 +426,9 @@ select case (in%transmitter%model)
         write(iterF, '(a'//clenFtot//',a)') trim(adjustl(int2str(j))), '/'//trim(adjustl(Ftot))
         f = freq(j)
         w = 2 * pi * f
-        eta0 = cmplx(5.d-15,0.d0,kind=dp) !cmplx(1.d-7,0.d0,kind=dp) !cmplx(0,1,kind=dp) * w * epsilon  !
+        eta0 = cmplx(1.d-12,w*epsilon,kind=dp)
         zeta = cmplx(0,1,kind=dp) * w * mu
+        eta = cmplx(sigmas,w*epsilon,kind=dp)
         do k = 1,nR
           write(iterR, '(a'//clenRtot//',a)') trim(adjustl(int2str(k))), '/'//trim(adjustl(Rtot))
           rPerc = rPerc + incPerc
@@ -376,9 +437,16 @@ select case (in%transmitter%model)
           Rx = rcv(k,1)
           Ry = rcv(k,2)
           Rz = rcv(k,3)
-          call vmd_xyz_loops(Tx,Ty,Tz,ncam,h,sigmas,eta0,zeta,Rx,Ry,Rz,Exp,Eyp,Hxp,Hyp,Hzp)
+          ! Calculating fields of vmd in most optimized manner:
+          call sanitizedata(ncam,Tz,Rz,esp,camadT,camadR,h,prof)
+          r = sqrt((Rx - Tx)**2 + (Ry - Ty)**2)
+          call commonarraysMD(ncam,npt,r,krJ0J1,zeta,eta0,Tz,h,prof,camadT,eta, &
+                 u,uh,AdmInt,ImpInt,RTEdw,RTEup,RTMdw,RTMup,FEdw,FEup,AMdw,AMup,FEdwz,FEupz)
+          call vmd_optimized(Tx,Ty,Tz,ncam,camadR,camadT,npt,krJ0J1,wJ0,wJ1,h, &
+                 prof,zeta,Rx,Ry,Rz,u,uh,AdmInt,RTEdw,RTEup,FEdwz,FEupz,Exp,Eyp,Ezp,Hxp,Hyp,Hzp)
+
           myout(p,:) = (/mydirecT(i),f,mydirecR(k),real(Exp),aimag(Exp),real(Eyp),aimag(Eyp),real(Ezp),aimag(Ezp), &
-                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp),aimag(Hzp)/)
+                        real(Hxp),aimag(Hxp),real(Hyp),aimag(Hyp),real(Hzp), aimag(Hzp)/)
           if (progress) call clifor_write_progress(info)
           p = p + 1
         end do

@@ -1,9 +1,7 @@
 tatu = \
-	Anderson \
 	parameters \
 	utils \
 	filters \
-	select_filter \
 	hedx \
 	hedy \
 	ved \
