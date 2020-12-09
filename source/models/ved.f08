@@ -20,18 +20,23 @@ subroutine ved_optimized(Tx, Ty, h0, n, camadR, camadT, npt, krJ0J1, wJ0, wJ1, h
 
   Hz_p = (0.0,0.0)
 
-  if ( dabs(cx - Tx) < eps ) then
-    x = 0.0
+  if (dabs(cx - Tx) < eps .and. dabs(cy - Ty) < eps) then
+    x = dsign(1.d-2,cx)
+    y = dsign(1.d-2,cy)
+    r = 1.d-2
+  elseif (dabs(cx - Tx) < eps) then
+    x = dsign(1.d-2,cx)
+    y = cy - Ty
+    r = dabs(y)
+  elseif (dabs(cy - Ty) < eps) then
+    x = cx - Tx
+    y = dsign(1.d-2,cy)
+    r = dabs(x)
   else
     x = cx - Tx
-  end if
-  if ( dabs(cy - Ty) < eps ) then
-    y = 0.0
-  else
     y = cy - Ty
+    r = dsqrt( x ** 2 + y ** 2 )
   end if
-  r = dsqrt( x ** 2 + y ** 2 )
-
   kr = krJ0J1 / r
 
   ! To workaround the warning: ... may be used uninitialized in this function

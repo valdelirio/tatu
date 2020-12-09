@@ -89,20 +89,25 @@ function real2strPerc(real)
   write(real2strPerc, '(i3)') nint(real)
 end function real2strPerc
 
-subroutine commonarraysED(n, npt, r, krJ0J1, zeta, eta0, h0, h, prof, camadT, eta, u, uh, AdmInt, ImpInt, &
+subroutine commonarraysED(n, npt, hordist, krJ0J1, zeta, eta0, h0, h, prof, camadT, eta, u, uh, AdmInt, ImpInt, &
                           RTEdw, RTEup, RTMdw, RTMup, FEdw, FEup, AMdw, AMup, AMdwz, AMupz)
   implicit none
   integer, intent(in) :: n, npt, camadT
-  real(dp), intent(in) :: r, krJ0J1(npt), h0, h(0:n), prof(-1:n)
+  real(dp), intent(in) :: hordist, krJ0J1(npt), h0, h(0:n), prof(-1:n)
   complex(dp), intent(in) :: eta(n), zeta, eta0
   complex(dp), dimension(npt), intent(out) :: AMdw, AMup, FEdw, FEup
   complex(dp), optional, dimension(npt), intent(out) :: AMdwz, AMupz
   complex(dp), dimension(npt,0:n), intent(out) :: u, AdmInt, ImpInt, uh, RTEdw, RTMdw, RTEup, RTMup
 
   integer :: i
-  real(dp) :: kr(npt)
+  real(dp) :: r, kr(npt)
   complex(dp) :: den(npt), wvnb2(0:n), tgh(npt,0:n), AdmApdw(npt,1:n), ImpApdw(npt,1:n), AdmApup(npt,0:n-1), ImpApup(npt,0:n-1)
 
+  if (hordist < eps) then
+    r = 1.d-2
+  else
+    r = hordist
+  end if
   kr = krJ0J1 / r
   wvnb2(0) = -zeta * eta0
   u(:,0) = sqrt(kr * kr - wvnb2(0))
