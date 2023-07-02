@@ -21,25 +21,21 @@ contains
       complex(dp), dimension(:,:), allocatable :: TMdw, TEdw, TMup, TEup
 
       if (dabs(cx - Tx) < eps .and. dabs(cy - Ty) < eps) then
-         ! x = dsign(1.d-2,cx)
-         x = 0.0    !assigning null values to very small coordinates
-         ! y = dsign(1.d-2,cy)
-         y = 0.0    !assigning null values to very small coordinates
-         r = 1.d-2  !value to avoid division by zero in preliminary field determination steps
+        x = 0.0    !assigning null values to very small coordinates
+        y = 0.0    !assigning null values to very small coordinates
+        r = 1.d-2  !value to avoid division by zero in preliminary field determination steps
       elseif (dabs(cx - Tx) < eps) then
-         !  x = dsign(1.d-2,cx)
-         x = 0.0  !assigning null value to very small abscissa
-         y = cy - Ty
-         r = dabs(y)
+        x = 0.0  !assigning null value to very small abscissa
+        y = cy - Ty
+        r = dabs(y)
       elseif (dabs(cy - Ty) < eps) then
-         x = cx - Tx
-         !  y = dsign(1.d-2,cy)
-         y = 0.0  !assigning null value to very small ordinate
-         r = dabs(x)
+        x = cx - Tx
+        y = 0.0  !assigning null value to very small ordinate
+        r = dabs(x)
       else
-         x = cx - Tx
-         y = cy - Ty
-         r = dsqrt( x ** 2 + y ** 2 )
+        x = cx - Tx
+        y = cy - Ty
+        r = dsqrt( x ** 2 + y ** 2 )
       end if
       kr = krJ0J1 / r
 
