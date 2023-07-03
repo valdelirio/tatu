@@ -34,7 +34,7 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 
   ! find the layer where the receiver is
   camad = 0
-  if (z < 0.d0) then
+  if (z < 0.d0) then  !when z=0, receiver in the first layer is preferable to avoid inaccuracy (to non-tangentials components)
     camad=0
   else if (z >= prof(n-1)) then
     camad=n
@@ -49,13 +49,13 @@ subroutine sanitizedata(n, h0, z, esp, camadT, camad, h, prof)
 
   ! find the layer where the transmitter is
   camadT = 0
-  if (h0 < 0.d0) then
+  if (h0 <= 0.d0) then  !when h0=0, transmitter in the air is preferable to avoid inaccuracy  (to non-tangentials components)
     camadT = 0
-  else if (h0 >= prof(n-1)) then
+  else if (h0 > prof(n-1)) then
     camadT = n
   else
     do j=n-1,1,-1
-      if (h0 >= prof(j-1)) then
+      if (h0 > prof(j-1)) then
         camadT = j
         exit
       end if
