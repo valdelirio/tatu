@@ -21,9 +21,7 @@ contains
       Ez_p = (0.0,0.0)
 
       if (dabs(cx - Tx) < eps .and. dabs(cy - Ty) < eps) then
-         ! x = dsign(1.d-2,cx)
          x = 0.0    !assigning null values to very small coordinates
-         ! y = dsign(1.d-2,cy)
          y = 0.0    !assigning null values to very small coordinates
          r = 1.d-2  !value to avoid division by zero in preliminary field determination steps
       elseif (dabs(cx - Tx) < eps) then
