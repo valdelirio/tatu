@@ -39,3 +39,5 @@ tatu
 *.x
 *.out
 *.app
+
+.vscode
